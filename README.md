@@ -21,6 +21,7 @@ const CONFIG = {
   CURRENCY: "DZD", // Currency code
   WEBHOOK_URL: "https://...", // Replace with your Google Apps Script URL
   WEBHOOK_SECRET: "your-secret-key-change-this", // Change to a secure secret
+  ORDER_SUBMIT_URL: "/api/submit-order", // Use proxy to avoid CORS when deployed; set GOOGLE_WEBHOOK_URL in Vercel
   PRIMARY_COLOR: "#2563eb", // Primary brand color (hex)
   ACCENT_COLOR: "#10b981", // Accent color (hex)
   SUCCESS_MESSAGE: "Order placed successfully!",
@@ -98,6 +99,21 @@ Edit CSS variables at the top of `style.css` (lines ~10-20) to change theme colo
   /* ... other variables */
 }
 ```
+
+## Fixing CORS When Deployed (e.g. Vercel)
+
+If your site is on a different domain (e.g. `business-rust-chi.vercel.app`), the browser will block direct requests to Google Apps Script (CORS). Orders will fail and never reach your sheet.
+
+**Fix:** Use the included API proxy so the browser only talks to your own domain.
+
+1. **Vercel:** In your project → **Settings** → **Environment Variables**, add:
+   - **Name:** `GOOGLE_WEBHOOK_URL`
+   - **Value:** your full Google Apps Script web app URL (same as `WEBHOOK_URL` in `script.js`)
+2. Redeploy. The frontend is already set to use `/api/submit-order`; the serverless function forwards to Google.
+
+To use the direct URL again (e.g. for local file or same-origin hosting), set `ORDER_SUBMIT_URL` to `null` or remove it in `script.js` so it falls back to `WEBHOOK_URL`.
+
+---
 
 ## Google Apps Script Webhook Setup
 

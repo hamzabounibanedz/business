@@ -21,6 +21,7 @@ const CONFIG = {
   // Webhook settings (REPLACE WITH YOUR GOOGLE APPS SCRIPT URL)
   WEBHOOK_URL: "https://script.google.com/macros/s/AKfycbz0pO6d3YoslFRadUD_6UKhw2Q0Um4B3bc8sGGaUIrt9pAnDEAGBlLm-C-a3lXI65r8/exec",
   WEBHOOK_SECRET: "myStore2025SecretKey",
+  ORDER_SUBMIT_URL: "/api/submit-order", // Proxy when deployed; set GOOGLE_WEBHOOK_URL in Vercel
   
   // Theme colors (hex codes)
   PRIMARY_COLOR: "#2563eb",
@@ -288,10 +289,11 @@ async function submitOrder(customerData) {
     payload.utm = utm;
   }
   
+  const orderEndpoint = CONFIG.ORDER_SUBMIT_URL || CONFIG.WEBHOOK_URL;
   let lastError = null;
   for (let attempt = 0; attempt <= CONFIG.MAX_CLIENT_RETRIES; attempt++) {
     try {
-      const response = await fetch(CONFIG.WEBHOOK_URL, {
+      const response = await fetch(orderEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
