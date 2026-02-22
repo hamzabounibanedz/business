@@ -19,8 +19,8 @@ const CONFIG = {
   CURRENCY: "DZD",
   
   // Webhook settings (REPLACE WITH YOUR GOOGLE APPS SCRIPT URL)
-  WEBHOOK_URL: "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
-  WEBHOOK_SECRET: "your-secret-key-change-this",
+  WEBHOOK_URL: "https://script.google.com/macros/s/AKfycbz0pO6d3YoslFRadUD_6UKhw2Q0Um4B3bc8sGGaUIrt9pAnDEAGBlLm-C-a3lXI65r8/exec",
+  WEBHOOK_SECRET: "myStore2025SecretKey",
   
   // Theme colors (hex codes)
   PRIMARY_COLOR: "#2563eb",
