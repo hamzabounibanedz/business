@@ -4,10 +4,7 @@
     "name": "Black Tee",
     "sku": "BT-001",
     "price": 4500,
-    "images": [
-      "https://via.placeholder.com/800x800/000000/FFFFFF?text=Black+Tee+Front",
-      "https://via.placeholder.com/800x800/333333/FFFFFF?text=Black+Tee+Back"
-    ],
+    "images": ["drugstore-skincare-products-collage-8fNsJ5Wza3l8W1qUuuwMvd-0322-46fdc90f727f4adeb3e950917749a76b.webp"],
     "description": "Classic black cotton t-shirt, comfortable fit.",
     "inventory": 50,
     "tags": ["clothing", "t-shirt", "casual"],
@@ -18,9 +15,7 @@
     "name": "White Tee",
     "sku": "WT-002",
     "price": 4500,
-    "images": [
-      "https://via.placeholder.com/800x800/FFFFFF/000000?text=White+Tee+Front"
-    ],
+    "images": ["still-life-care-products-1024x683.jpg.webp"],
     "description": "Premium white cotton t-shirt, perfect for everyday wear.",
     "inventory": 30,
     "tags": ["clothing", "t-shirt", "casual"],
@@ -31,9 +26,7 @@
     "name": "Classic Jeans",
     "sku": "JEANS-001",
     "price": 12000,
-    "images": [
-      "https://via.placeholder.com/800x800/1e3a8a/FFFFFF?text=Classic+Jeans"
-    ],
+    "images": ["1587874-13-Best-Natural-Skin-Care-Products-1296x728-Header-81b9bf.avif"],
     "description": "Durable denim jeans with classic fit.",
     "inventory": 25,
     "tags": ["clothing", "pants", "denim"],

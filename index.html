@@ -16,12 +16,12 @@
   <title>My Store - Quality Products</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Skip to main content link for accessibility -->
-  <a href="#products-section" class="skip-link">Skip to main content</a>
+  <!-- Skip to main content link for accessibility (keyboard/screen reader) -->
+  <a href="#main" class="skip-link">Skip to main content</a>
   
   <!-- Header -->
   <header class="header">
@@ -32,10 +32,10 @@
       <nav class="header-nav" aria-label="Main navigation">
         <a href="#products-section" class="nav-link">Shop</a>
         <button class="cart-icon-btn" onclick="openCart()" aria-label="Open cart" aria-expanded="false" id="cart-button">
-          <svg class="cart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M9 2L7 6H2v14h18V6h-5L13 2H9z"/>
-            <circle cx="7" cy="20" r="1"/>
-            <circle cx="17" cy="20" r="1"/>
+          <svg class="cart-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
           </svg>
           <span class="cart-count-badge" id="cart-count" style="display: none;" aria-live="polite">0</span>
         </button>
@@ -43,13 +43,22 @@
     </div>
   </header>
 
+  <main id="main">
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
+      <p class="hero-tagline">Welcome to</p>
       <h2 class="hero-title">Premium Quality Clothing</h2>
-      <p class="hero-subtitle">Shop the latest styles with fast delivery across Algeria</p>
+      <p class="hero-subtitle">Curated styles for everyday life. Comfortable fabrics, honest prices, and fast delivery to every wilaya.</p>
+      <div class="hero-trust">
+        <span class="hero-trust-item">Nationwide delivery</span>
+        <span class="hero-trust-dot" aria-hidden="true">·</span>
+        <span class="hero-trust-item">Quality guarantee</span>
+        <span class="hero-trust-dot" aria-hidden="true">·</span>
+        <span class="hero-trust-item">Secure checkout</span>
+      </div>
       <div class="hero-cta-group">
-        <button class="btn btn-primary btn-large" onclick="document.getElementById('products-section').scrollIntoView({ behavior: 'smooth' })" aria-label="Browse our products">
+        <button class="btn btn-primary btn-large" onclick="var s=document.getElementById('products-section');var i=document.getElementById('search-input');if(s){s.scrollIntoView({behavior:'smooth'});if(i)setTimeout(function(){i.focus();},400);}" aria-label="Browse our products">
           Shop Now
         </button>
         <button class="btn btn-secondary btn-large" onclick="openCart()" aria-label="View your cart">
@@ -59,23 +68,54 @@
     </div>
   </section>
 
+  <!-- Brand / Why Us Section -->
+  <section class="brand-section" aria-labelledby="brand-heading">
+    <div class="container">
+      <h2 id="brand-heading" class="section-title">Why Shop With Us</h2>
+      <p class="brand-intro">We believe in simple, reliable shopping—no fuss, just quality products and service you can count on.</p>
+      <div class="brand-features">
+        <div class="brand-feature">
+          <span class="brand-feature-icon brand-feature-icon--delivery" aria-hidden="true"></span>
+          <h3 class="brand-feature-title">Fast Delivery</h3>
+          <p class="brand-feature-text">Quick shipping across all 58 wilayas. Track your order every step of the way.</p>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature-icon brand-feature-icon--quality" aria-hidden="true"></span>
+          <h3 class="brand-feature-title">Quality First</h3>
+          <p class="brand-feature-text">Carefully selected materials and construction. We stand behind every product.</p>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature-icon brand-feature-icon--secure" aria-hidden="true"></span>
+          <h3 class="brand-feature-title">Secure & Simple</h3>
+          <p class="brand-feature-text">Safe checkout and clear pricing. No hidden fees—what you see is what you pay.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Products Section -->
   <section id="products-section" class="products-section">
     <div class="container">
       <h2 class="section-title">Our Products</h2>
       
-      <!-- Search & Filters -->
+      <!-- Search & Filters (prominent search for quick discovery) -->
       <div class="filters-container">
+        <label for="search-input" class="search-label">Search products</label>
         <div class="search-box">
+          <svg class="search-box-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+          </svg>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Search products..." 
-            aria-label="Search products"
+            placeholder="Search by name, category..." 
+            aria-label="Search products by name or category"
             oninput="debouncedSearch(event)"
+            autocomplete="off"
           >
         </div>
-        
+        <div id="applied-filters" class="applied-filters" aria-live="polite" aria-label="Active filters"></div>
         <div class="filters-grid">
           <div class="filter-group">
             <label for="filter-tag">Category</label>
@@ -111,6 +151,7 @@
       </div>
     </div>
   </section>
+  </main>
 
   <!-- Product Modal -->
   <div id="product-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="product-modal-title" aria-hidden="true">
@@ -120,7 +161,9 @@
   <!-- Cart Modal -->
   <div id="cart-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title" aria-hidden="true">
     <div class="modal-content cart-modal-content">
-      <button class="modal-close" onclick="closeCart()" aria-label="Close cart">×</button>
+      <button class="modal-close" onclick="closeCart()" aria-label="Close cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
       <h2 id="cart-modal-title">Your Cart</h2>
       
       <div id="cart-items" class="cart-items">
@@ -237,7 +280,7 @@
             aria-invalid="false"
           ></textarea>
         </div>
-        
+        <p class="checkout-trust" aria-hidden="true">Secure checkout · Your data is protected</p>
         <button type="submit" class="btn btn-primary btn-large btn-block">
           Place Order
         </button>
@@ -250,52 +293,16 @@
     <!-- Content rendered dynamically by script.js -->
   </div>
 
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-brand" id="footer-store-name">My Store</p>
+      <p class="footer-tagline">Quality clothing, delivered across Algeria.</p>
+      <p class="footer-trust">Secure checkout · Quality guarantee · Nationwide delivery</p>
+      <p class="footer-copy">&copy; <span id="footer-year"></span> <span id="footer-store-name-copy">My Store</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
-  <script>
-    // Populate filter options and store name on load
-    document.addEventListener("DOMContentLoaded", function() {
-      // Update store name
-      const storeNameEl = document.getElementById("store-name");
-      if (storeNameEl && typeof CONFIG !== "undefined") {
-        storeNameEl.textContent = CONFIG.STORE_NAME;
-      }
-      
-      // Populate category filter
-      const tagFilter = document.getElementById("filter-tag");
-      if (tagFilter && typeof PRODUCTS !== "undefined") {
-        const allTags = [...new Set(PRODUCTS.flatMap(p => p.tags))];
-        allTags.forEach(tag => {
-          const option = document.createElement("option");
-          option.value = tag;
-          option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
-          tagFilter.appendChild(option);
-        });
-      }
-      
-      // Populate size filter
-      const sizeFilter = document.getElementById("filter-size");
-      if (sizeFilter && typeof PRODUCTS !== "undefined") {
-        const allSizes = [...new Set(PRODUCTS.flatMap(p => p.sizes || []))];
-        allSizes.sort();
-        allSizes.forEach(size => {
-          const option = document.createElement("option");
-          option.value = size;
-          option.textContent = size;
-          sizeFilter.appendChild(option);
-        });
-      }
-      
-      // Populate wilaya dropdown
-      const wilayaSelect = document.getElementById("checkout-wilaya");
-      if (wilayaSelect && typeof WILAYAS !== "undefined") {
-        WILAYAS.forEach(wilaya => {
-          const option = document.createElement("option");
-          option.value = wilaya;
-          option.textContent = wilaya;
-          wilayaSelect.appendChild(option);
-        });
-      }
-    });
-  </script>
 </body>
 </html>

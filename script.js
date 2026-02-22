@@ -341,16 +341,17 @@ function filterProducts(searchTerm = "", tagFilter = "", sizeFilter = "", priceM
   // Search
   if (searchTerm) {
     const term = searchTerm.toLowerCase();
-    filtered = filtered.filter(p => 
-      p.name.toLowerCase().includes(term) ||
-      p.description.toLowerCase().includes(term) ||
-      p.tags.some(tag => tag.toLowerCase().includes(term))
+    const tags = p => (p.tags || []);
+    filtered = filtered.filter(p =>
+      (p.name || '').toLowerCase().includes(term) ||
+      (p.description || '').toLowerCase().includes(term) ||
+      tags(p).some(tag => String(tag).toLowerCase().includes(term))
     );
   }
-  
+
   // Tag filter
   if (tagFilter) {
-    filtered = filtered.filter(p => p.tags.includes(tagFilter));
+    filtered = filtered.filter(p => (p.tags || []).includes(tagFilter));
   }
   
   // Size filter
@@ -385,11 +386,17 @@ function escapeHtml(text) {
 }
 
 function sanitizeUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  // Relative paths (same-origin images, e.g. "photo.webp")
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
   try {
-    const urlObj = new URL(url);
-    // Only allow http/https protocols
+    const urlObj = new URL(trimmed);
     if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
-      return url;
+      return trimmed;
     }
     return '#';
   } catch {
@@ -641,8 +648,8 @@ function renderProductModal(productId) {
   
   const closeBtn = document.createElement('button');
   closeBtn.className = 'modal-close';
-  closeBtn.textContent = '×';
   closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>';
   closeBtn.addEventListener('click', closeProductModal);
   
   const grid = document.createElement('div');
@@ -712,14 +719,14 @@ function renderProductModal(productId) {
     
     const prevBtn = document.createElement('button');
     prevBtn.className = 'carousel-btn prev';
-    prevBtn.textContent = '‹';
     prevBtn.setAttribute('aria-label', 'Previous image');
+    prevBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
     prevBtn.addEventListener('click', carouselPrev);
     
     const nextBtn = document.createElement('button');
     nextBtn.className = 'carousel-btn next';
-    nextBtn.textContent = '›';
     nextBtn.setAttribute('aria-label', 'Next image');
+    nextBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
     nextBtn.addEventListener('click', carouselNext);
     
     controls.appendChild(prevBtn);
@@ -1371,15 +1378,128 @@ function showNotification(message, isError = false) {
 // ============================================================================
 // SEARCH & FILTER HANDLERS
 // ============================================================================
+function getCurrentFilterState() {
+  return {
+    search: document.getElementById("search-input")?.value?.trim() || "",
+    tag: document.getElementById("filter-tag")?.value || "",
+    size: document.getElementById("filter-size")?.value || "",
+    priceMin: document.getElementById("filter-price-min")?.value || "",
+    priceMax: document.getElementById("filter-price-max")?.value || ""
+  };
+}
+
+function updateAppliedFilters() {
+  const container = document.getElementById("applied-filters");
+  if (!container) return;
+  const state = getCurrentFilterState();
+  const hasSearch = state.search.length > 0;
+  const hasTag = state.tag.length > 0;
+  const hasSize = state.size.length > 0;
+  const hasPrice = (state.priceMin !== "" || state.priceMax !== "");
+  const activeCount = [hasSearch, hasTag, hasSize, hasPrice].filter(Boolean).length;
+  if (activeCount === 0) {
+    container.textContent = "";
+    return;
+  }
+  container.textContent = "";
+  if (hasSearch) {
+    const chip = document.createElement("span");
+    chip.className = "applied-filter-chip";
+    chip.textContent = "Search: \u201C" + state.search + "\u201D ";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = "&times;";
+    btn.setAttribute("aria-label", "Remove search filter");
+    btn.addEventListener("click", function() {
+      const input = document.getElementById("search-input");
+      if (input) { input.value = ""; handleFilterChange(); }
+    });
+    chip.appendChild(btn);
+    container.appendChild(chip);
+  }
+  if (hasTag) {
+    const chip = document.createElement("span");
+    chip.className = "applied-filter-chip";
+    chip.textContent = "Category: " + state.tag + " ";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = "&times;";
+    btn.setAttribute("aria-label", "Remove category filter");
+    btn.addEventListener("click", function() {
+      const sel = document.getElementById("filter-tag");
+      if (sel) { sel.value = ""; handleFilterChange(); }
+    });
+    chip.appendChild(btn);
+    container.appendChild(chip);
+  }
+  if (hasSize) {
+    const chip = document.createElement("span");
+    chip.className = "applied-filter-chip";
+    chip.textContent = "Size: " + state.size + " ";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = "&times;";
+    btn.setAttribute("aria-label", "Remove size filter");
+    btn.addEventListener("click", function() {
+      const sel = document.getElementById("filter-size");
+      if (sel) { sel.value = ""; handleFilterChange(); }
+    });
+    chip.appendChild(btn);
+    container.appendChild(chip);
+  }
+  if (hasPrice) {
+    const label = (state.priceMin && state.priceMax)
+      ? state.priceMin + " \u2013 " + state.priceMax + " DZD"
+      : state.priceMin ? "Min " + state.priceMin + " DZD" : "Max " + state.priceMax + " DZD";
+    const chip = document.createElement("span");
+    chip.className = "applied-filter-chip";
+    chip.textContent = "Price: " + label + " ";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.innerHTML = "&times;";
+    btn.setAttribute("aria-label", "Remove price filter");
+    btn.addEventListener("click", function() {
+      const min = document.getElementById("filter-price-min");
+      const max = document.getElementById("filter-price-max");
+      if (min) min.value = ""; if (max) max.value = "";
+      handleFilterChange();
+    });
+    chip.appendChild(btn);
+    container.appendChild(chip);
+  }
+  const clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "applied-filters-clear";
+  clearBtn.textContent = "Clear all";
+  clearBtn.setAttribute("aria-label", "Clear all filters");
+  clearBtn.addEventListener("click", clearAllFilters);
+  container.appendChild(clearBtn);
+}
+
+function clearAllFilters() {
+  const searchInput = document.getElementById("search-input");
+  const tagSelect = document.getElementById("filter-tag");
+  const sizeSelect = document.getElementById("filter-size");
+  const priceMin = document.getElementById("filter-price-min");
+  const priceMax = document.getElementById("filter-price-max");
+  if (searchInput) searchInput.value = "";
+  if (tagSelect) tagSelect.value = "";
+  if (sizeSelect) sizeSelect.value = "";
+  if (priceMin) priceMin.value = "";
+  if (priceMax) priceMax.value = "";
+  renderProducts(PRODUCTS);
+  updateAppliedFilters();
+}
+
 function handleSearch(event) {
   const term = event.target.value;
   const tagFilter = document.getElementById("filter-tag")?.value || "";
   const sizeFilter = document.getElementById("filter-size")?.value || "";
   const priceMin = document.getElementById("filter-price-min")?.value || null;
   const priceMax = document.getElementById("filter-price-max")?.value || null;
-  
   const filtered = filterProducts(term, tagFilter, sizeFilter, priceMin, priceMax);
-  renderProducts(filtered); // renderProducts already updates result count
+  renderProducts(filtered);
+  updateAppliedFilters();
 }
 
 const debouncedSearch = debounceSearch(handleSearch);
@@ -1390,24 +1510,29 @@ function handleFilterChange() {
   const sizeFilter = document.getElementById("filter-size")?.value || "";
   const priceMin = document.getElementById("filter-price-min")?.value || null;
   const priceMax = document.getElementById("filter-price-max")?.value || null;
-  
   const filtered = filterProducts(searchTerm, tagFilter, sizeFilter, priceMin, priceMax);
-  renderProducts(filtered); // renderProducts already updates result count
+  renderProducts(filtered);
+  updateAppliedFilters();
 }
 
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
 async function init() {
-  // Apply CONFIG colors to CSS variables
+  // Apply CONFIG colors to CSS variables (sync with design system)
   document.documentElement.style.setProperty("--primary-color", CONFIG.PRIMARY_COLOR);
+  document.documentElement.style.setProperty("--color-accent", CONFIG.ACCENT_COLOR);
   document.documentElement.style.setProperty("--accent-color", CONFIG.ACCENT_COLOR);
   
-  // Update store name in header
+  // Update store name (header + footer)
   const storeNameEl = document.getElementById("store-name");
-  if (storeNameEl) {
-    storeNameEl.textContent = CONFIG.STORE_NAME;
-  }
+  const footerBrandEl = document.getElementById("footer-store-name");
+  const footerCopyName = document.getElementById("footer-store-name-copy");
+  if (storeNameEl) storeNameEl.textContent = CONFIG.STORE_NAME;
+  if (footerBrandEl) footerBrandEl.textContent = CONFIG.STORE_NAME;
+  if (footerCopyName) footerCopyName.textContent = CONFIG.STORE_NAME;
+  const yearSpan = document.getElementById("footer-year");
+  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
   
   // Update page title
   document.title = `${CONFIG.STORE_NAME} - Quality Products`;
@@ -1415,8 +1540,41 @@ async function init() {
   // Load products from JSON file
   await loadProducts();
   
-  // Render initial products
+  // Populate filters and wilaya (after products loaded)
+  const tagFilter = document.getElementById("filter-tag");
+  if (tagFilter && PRODUCTS.length) {
+    const allTags = [...new Set(PRODUCTS.flatMap(p => p.tags))];
+    allTags.forEach(tag => {
+      const option = document.createElement("option");
+      option.value = tag;
+      option.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+      tagFilter.appendChild(option);
+    });
+  }
+  const sizeFilter = document.getElementById("filter-size");
+  if (sizeFilter && PRODUCTS.length) {
+    const allSizes = [...new Set(PRODUCTS.flatMap(p => p.sizes || []))];
+    allSizes.sort();
+    allSizes.forEach(size => {
+      const option = document.createElement("option");
+      option.value = size;
+      option.textContent = size;
+      sizeFilter.appendChild(option);
+    });
+  }
+  const wilayaSelect = document.getElementById("checkout-wilaya");
+  if (wilayaSelect && typeof WILAYAS !== "undefined") {
+    WILAYAS.forEach(wilaya => {
+      const option = document.createElement("option");
+      option.value = wilaya;
+      option.textContent = wilaya;
+      wilayaSelect.appendChild(option);
+    });
+  }
+  
+  // Render initial products and applied filters
   renderProducts();
+  updateAppliedFilters();
   updateCartUI();
   
   // Handle deep linking
@@ -1454,12 +1612,7 @@ async function init() {
     { field: "checkout-email", error: "error-email" },
     { field: "checkout-phone", error: "error-phone" },
     { field: "checkout-wilaya", error: "error-wilaya" },
-    { field: "checkout-address", error: "error-address" },
-    { field: "checkout-address", error: "error-address" },
-    { field: "checkout-lastname", error: "error-lastname" },
-    { field: "checkout-email", error: "error-email" },
-    { field: "checkout-phone", error: "error-phone" },
-    { field: "checkout-wilaya", error: "error-wilaya" }
+    { field: "checkout-address", error: "error-address" }
   ];
   
   formFields.forEach(({ field, error }) => {
