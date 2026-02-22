@@ -1,0 +1,42 @@
+[
+  {
+    "id": "BT-001",
+    "name": "Black Tee",
+    "sku": "BT-001",
+    "price": 4500,
+    "images": [
+      "https://via.placeholder.com/800x800/000000/FFFFFF?text=Black+Tee+Front",
+      "https://via.placeholder.com/800x800/333333/FFFFFF?text=Black+Tee+Back"
+    ],
+    "description": "Classic black cotton t-shirt, comfortable fit.",
+    "inventory": 50,
+    "tags": ["clothing", "t-shirt", "casual"],
+    "sizes": ["S", "M", "L", "XL"]
+  },
+  {
+    "id": "WT-002",
+    "name": "White Tee",
+    "sku": "WT-002",
+    "price": 4500,
+    "images": [
+      "https://via.placeholder.com/800x800/FFFFFF/000000?text=White+Tee+Front"
+    ],
+    "description": "Premium white cotton t-shirt, perfect for everyday wear.",
+    "inventory": 30,
+    "tags": ["clothing", "t-shirt", "casual"],
+    "sizes": ["S", "M", "L", "XL", "XXL"]
+  },
+  {
+    "id": "JEANS-001",
+    "name": "Classic Jeans",
+    "sku": "JEANS-001",
+    "price": 12000,
+    "images": [
+      "https://via.placeholder.com/800x800/1e3a8a/FFFFFF?text=Classic+Jeans"
+    ],
+    "description": "Durable denim jeans with classic fit.",
+    "inventory": 25,
+    "tags": ["clothing", "pants", "denim"],
+    "sizes": ["28", "30", "32", "34", "36"]
+  }
+]
