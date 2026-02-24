@@ -47,9 +47,8 @@
   <!-- Hero Section -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="container">
-      <p class="hero-tagline">مرحباً بكم في</p>
-      <h2 id="hero-title" class="hero-title">ملابس بجودة ممتازة</h2>
-      <p class="hero-subtitle">تشكيلات مختارة للحياة اليومية. أقمشة مريحة، أسعار مناسبة، وتوصيل سريع إلى كل ولاية.</p>
+      <h2 id="hero-title" class="hero-title">أناقة تليق بك</h2>
+      <p class="hero-subtitle">تشكيلة رجالية مختارة بعناية — من القميص إلى البدلة</p>
       <div class="hero-trust">
         <span class="hero-trust-item">توصيل لجميع الولايات</span>
         <span class="hero-trust-dot" aria-hidden="true">·</span>
@@ -58,11 +57,11 @@
         <span class="hero-trust-item">دفع آمن</span>
       </div>
       <div class="hero-cta-group">
-        <button class="btn btn-primary btn-large" onclick="var s=document.getElementById('products-section');var i=document.getElementById('search-input');if(s){s.scrollIntoView({behavior:'smooth'});if(i)setTimeout(function(){i.focus();},400);}" aria-label="تصفح منتجاتنا">
+        <button class="btn btn-primary btn-large hero-cta-primary" onclick="var s=document.getElementById('products-section');var i=document.getElementById('search-input');if(s){s.scrollIntoView({behavior:'smooth'});if(i)setTimeout(function(){i.focus();},400);}" aria-label="تصفح منتجاتنا">
           تسوق الآن
         </button>
-        <button class="btn btn-secondary btn-large" onclick="openCart()" aria-label="عرض السلة">
-          عرض السلة
+        <button class="btn btn-secondary btn-large" onclick="var s=document.getElementById('products-section');if(s)s.scrollIntoView({behavior:'smooth'});" aria-label="تصفح الفئات">
+          تصفح الفئات
         </button>
       </div>
       <div class="hero-stats" aria-hidden="true">
@@ -84,10 +83,46 @@
     </div>
   </section>
 
+  <!-- Trust / Value proposition bar -->
+  <section class="trust-bar" aria-label="مزايا المتجر">
+    <div class="container">
+      <div class="trust-bar-grid">
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">🚚</span>
+          <div>
+            <strong class="trust-title">توصيل لكل الجزائر</strong>
+            <span class="trust-sub">٥٨ ولاية</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">✦</span>
+          <div>
+            <strong class="trust-title">جودة مضمونة</strong>
+            <span class="trust-sub">قطع مختارة بعناية</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">↩</span>
+          <div>
+            <strong class="trust-title">إرجاع مريح</strong>
+            <span class="trust-sub">خلال ٧ أيام</span>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon" aria-hidden="true">◎</span>
+          <div>
+            <strong class="trust-title">خدمة العملاء</strong>
+            <span class="trust-sub">متاح ٧ أيام</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Products Section -->
   <section id="products-section" class="products-section" aria-labelledby="products-section-title">
     <div class="container">
-      <h2 id="products-section-title" class="section-title">منتجاتنا</h2>
+      <h2 id="products-section-title" class="section-title">التشكيلة الكاملة</h2>
 
       <!-- Category Tabs — populated dynamically after products load -->
       <div class="category-tabs-wrapper" role="tablist" aria-label="تصفية حسب التصنيف">
@@ -126,15 +161,15 @@
             </div>
           </div>
           <div class="filter-group">
-            <label for="filter-tag">التصنيف</label>
+            <label for="filter-tag">الوسوم</label>
             <select id="filter-tag" onchange="handleFilterChange()">
-              <option value="">الكل</option>
+              <option value="">كل الوسوم</option>
             </select>
           </div>
           <div class="filter-group">
             <label for="filter-size">المقاس</label>
             <select id="filter-size" onchange="handleFilterChange()">
-              <option value="">الكل</option>
+              <option value="">كل المقاسات</option>
             </select>
           </div>
         </div>
@@ -347,6 +382,8 @@
       <p class="footer-brand" id="footer-store-name">متجري</p>
       <p class="footer-tagline">ملابس بجودة عالية، توصيل في كل أنحاء الجزائر.</p>
       <p class="footer-trust">دفع آمن · ضمان الجودة · توصيل لجميع الولايات</p>
+      <p class="footer-contact">للطلب أو الاستفسار: <a href="#" id="footer-whatsapp-link">تواصل معنا</a></p>
+      <p class="footer-links"><a href="#">سياسة الخصوصية</a> · <a href="#">سياسة الإرجاع</a></p>
       <p class="footer-copy">© <span id="footer-year"></span> <span id="footer-store-name-copy">متجري</span>. جميع الحقوق محفوظة.</p>
     </div>
   </footer>

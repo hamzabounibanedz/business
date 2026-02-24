@@ -363,16 +363,23 @@ function debounceSearch(callback, delay = 300) {
   };
 }
 
-function filterProducts(searchTerm = "", tagFilter = "", sizeFilter = "", priceMin = null, priceMax = null) {
+function filterProducts(searchTerm = "", tagFilter = "", sizeFilter = "", priceMin = null, priceMax = null, categorySlug = "") {
   let filtered = [...PRODUCTS];
-  
+
+  if (categorySlug) {
+    filtered = filtered.filter(p => p.category && p.category.slug === categorySlug);
+  }
+
   // Search
   if (searchTerm) {
     const term = searchTerm.toLowerCase();
     const tags = p => (p.tags || []);
+    const nameAr = p => (p.name_ar || p.name || '');
     filtered = filtered.filter(p =>
       (p.name || '').toLowerCase().includes(term) ||
+      nameAr(p).toLowerCase().includes(term) ||
       (p.description || '').toLowerCase().includes(term) ||
+      (p.description_ar || '').toLowerCase().includes(term) ||
       tags(p).some(tag => String(tag).toLowerCase().includes(term))
     );
   }
@@ -381,12 +388,12 @@ function filterProducts(searchTerm = "", tagFilter = "", sizeFilter = "", priceM
   if (tagFilter) {
     filtered = filtered.filter(p => (p.tags || []).includes(tagFilter));
   }
-  
+
   // Size filter
   if (sizeFilter) {
     filtered = filtered.filter(p => p.sizes && p.sizes.includes(sizeFilter));
   }
-  
+
   // Price range
   if (priceMin !== null && priceMin !== "") {
     filtered = filtered.filter(p => p.price >= Number(priceMin));
@@ -394,7 +401,7 @@ function filterProducts(searchTerm = "", tagFilter = "", sizeFilter = "", priceM
   if (priceMax !== null && priceMax !== "") {
     filtered = filtered.filter(p => p.price <= Number(priceMax));
   }
-  
+
   return filtered;
 }
 
@@ -439,6 +446,32 @@ function validateInput(text, maxLength = 1000) {
 }
 
 // ============================================================================
+// RESULT COUNT & SECTION TITLE (Arabic grammar)
+// ============================================================================
+function formatProductCount(count) {
+  if (count === 0) return 'لا توجد منتجات';
+  if (count === 1) return 'منتج واحد';
+  if (count === 2) return 'منتجان';
+  if (count <= 10) return count + ' منتجات';
+  return count + ' منتج';
+}
+
+function updateSectionTitle() {
+  const titleEl = document.getElementById('products-section-title');
+  if (!titleEl) return;
+  const activeCategory = document.querySelector('.category-tab.active');
+  const searchVal = document.getElementById('search-input')?.value?.trim();
+  if (searchVal) {
+    titleEl.textContent = 'نتائج البحث عن: "' + searchVal + '"';
+  } else if (activeCategory && activeCategory.dataset.slug) {
+    const label = activeCategory.textContent.trim().replace(/\s*\(\d+\)\s*$/, '').trim();
+    titleEl.textContent = label || 'التشكيلة الكاملة';
+  } else {
+    titleEl.textContent = 'التشكيلة الكاملة';
+  }
+}
+
+// ============================================================================
 // DOM RENDERING
 // ============================================================================
 function updateCartUI() {
@@ -461,19 +494,31 @@ function updateCartUI() {
   renderCart();
 }
 
+function showProductSkeleton(count) {
+  count = count || 8;
+  const grid = document.getElementById("product-grid");
+  if (!grid) return;
+  const line = (w, h, mb) => '<div class="product-skeleton-line" style="width:' + w + '%;height:' + (h || 10) + 'px;margin-bottom:' + (mb || 8) + 'px"></div>';
+  grid.innerHTML = Array(count).fill(
+    '<div class="product-card product-card--skeleton" aria-hidden="true">' +
+    '<div class="product-image product-skeleton-image"></div>' +
+    '<div class="product-info">' + line(60, 10, 8) + line(90, 14, 6) + line(40, 14, 0) + '</div></div>'
+  ).join('');
+}
+
 function renderProducts(products = PRODUCTS) {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
-  
-  // Update result count
+
   const resultCount = document.getElementById("result-count");
   if (resultCount) {
-    resultCount.textContent = products.length === 1 ? "منتج واحد" : `${products.length} منتج`;
+    const count = products.length;
+    resultCount.textContent = count > 0 ? 'عرض ' + formatProductCount(count) : formatProductCount(count);
   }
-  
-  // Clear grid
+
+  updateSectionTitle();
   grid.textContent = '';
-  
+
   if (products.length === 0) {
     const noResults = document.createElement('div');
     noResults.className = 'no-results';
@@ -495,7 +540,7 @@ function renderProducts(products = PRODUCTS) {
 
   document.querySelector('.search-box')?.classList.remove('searching');
 
-  products.forEach((product) => {
+  products.forEach((product, index) => {
     const name = product.name_ar || product.name;
     const desc = product.description_ar || product.description;
     const card = document.createElement('div');
@@ -520,7 +565,7 @@ function renderProducts(products = PRODUCTS) {
     const img = document.createElement('img');
     img.src = sanitizeUrl((product.images && product.images[0]) || '');
     img.alt = escapeHtml(name);
-    img.loading = 'lazy';
+    img.loading = index < 4 ? 'eager' : 'lazy';
     img.addEventListener('load', () => img.classList.add('loaded'));
     img.addEventListener('error', () => {
       img.style.display = 'none';
@@ -530,11 +575,18 @@ function renderProducts(products = PRODUCTS) {
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'product-info';
+    if (product.category && product.category.name) {
+      const catLabel = document.createElement('span');
+      catLabel.className = 'product-card-category';
+      catLabel.textContent = product.category.name;
+      infoDiv.appendChild(catLabel);
+    }
     const heading = document.createElement('h3');
+    heading.className = 'product-name';
     heading.textContent = name;
     const price = document.createElement('p');
     price.className = 'product-price';
-    price.textContent = `${(Number(product.price) || 0).toLocaleString()} ${CONFIG.CURRENCY}`;
+    price.textContent = (Number(product.price) || 0).toLocaleString('ar-DZ') + ' ' + CONFIG.CURRENCY;
     const description = document.createElement('p');
     description.className = 'product-description';
     description.textContent = desc || '';
@@ -559,8 +611,8 @@ function renderProducts(products = PRODUCTS) {
     viewBtn.setAttribute('aria-label', 'عرض تفاصيل ' + name);
     viewBtn.addEventListener('click', () => openProductModal(product.id));
     const addBtn = document.createElement('button');
-    addBtn.className = 'btn btn-primary';
-    addBtn.textContent = 'أضف إلى السلة';
+    addBtn.className = 'btn btn-primary add-to-cart';
+    addBtn.textContent = 'أضف للسلة';
     addBtn.setAttribute('aria-label', 'إضافة ' + name + ' إلى السلة');
     addBtn.addEventListener('click', () => quickAddToCart(product.id));
     actions.appendChild(viewBtn);
@@ -619,8 +671,8 @@ function renderCart() {
     emptyDiv.appendChild(shopBtn);
     cartItemsEl.appendChild(emptyDiv);
     
-    if (cartSubtotalEl) cartSubtotalEl.textContent = `0 ${CONFIG.CURRENCY}`;
-    if (cartTotalEl) cartTotalEl.textContent = `0 ${CONFIG.CURRENCY}`;
+    if (cartSubtotalEl) cartSubtotalEl.textContent = '0 ' + CONFIG.CURRENCY;
+    if (cartTotalEl) cartTotalEl.textContent = '0 ' + CONFIG.CURRENCY;
     return;
   }
   
@@ -649,11 +701,11 @@ function renderCart() {
     
     const meta = document.createElement('p');
     meta.className = 'cart-item-meta';
-    meta.textContent = `المقاس: ${item.size} • ${item.price.toLocaleString()} ${CONFIG.CURRENCY}`;
-    
+    meta.textContent = 'المقاس: ' + item.size + ' • ' + item.price.toLocaleString('ar-DZ') + ' ' + CONFIG.CURRENCY;
+
     const totalDiv = document.createElement('div');
     totalDiv.className = 'cart-item-total';
-    totalDiv.textContent = `${(item.price * item.quantity).toLocaleString()} ${CONFIG.CURRENCY}`;
+    totalDiv.textContent = (item.price * item.quantity).toLocaleString('ar-DZ') + ' ' + CONFIG.CURRENCY;
 
     infoDiv.appendChild(heading);
     infoDiv.appendChild(meta);
@@ -695,8 +747,8 @@ function renderCart() {
     cartItemsEl.appendChild(itemDiv);
   });
   
-  if (cartSubtotalEl) cartSubtotalEl.textContent = `${totals.subtotal.toLocaleString()} ${CONFIG.CURRENCY}`;
-  if (cartTotalEl) cartTotalEl.textContent = `${totals.total.toLocaleString()} ${CONFIG.CURRENCY}`;
+  if (cartSubtotalEl) cartSubtotalEl.textContent = totals.subtotal.toLocaleString('ar-DZ') + ' ' + CONFIG.CURRENCY;
+  if (cartTotalEl) cartTotalEl.textContent = totals.total.toLocaleString('ar-DZ') + ' ' + CONFIG.CURRENCY;
 }
 
 function renderProductModal(productId) {
@@ -1418,14 +1470,14 @@ function showOrderSuccess(orderId, payload) {
   payload.items.forEach(item => {
     const row = document.createElement("div");
     row.className = "success-order-item";
-    row.innerHTML = "<span>" + escapeHtml(item.name) + " — " + escapeHtml(item.size) + " × " + item.quantity + "</span><span>" + (item.price * item.quantity).toLocaleString() + " " + CONFIG.CURRENCY + "</span>";
+    row.innerHTML = "<span>" + escapeHtml(item.name) + " — " + escapeHtml(item.size) + " × " + item.quantity + "</span><span>" + (item.price * item.quantity).toLocaleString('ar-DZ') + " " + CONFIG.CURRENCY + "</span>";
     itemsWrap.appendChild(row);
   });
 
   const totalP = document.createElement("p");
   totalP.textContent = "الإجمالي: ";
   const totalStrong = document.createElement("strong");
-  totalStrong.textContent = payload.total.toLocaleString() + " " + CONFIG.CURRENCY;
+  totalStrong.textContent = payload.total.toLocaleString('ar-DZ') + " " + CONFIG.CURRENCY;
   totalP.appendChild(totalStrong);
 
   const continueBtn = document.createElement("button");
@@ -1631,7 +1683,7 @@ function handleSearch(event) {
   const sizeFilter = document.getElementById("filter-size")?.value || "";
   const priceMin = document.getElementById("filter-price-min")?.value || null;
   const priceMax = document.getElementById("filter-price-max")?.value || null;
-  const filtered = filterProducts(term, tagFilter, sizeFilter, priceMin, priceMax);
+  const filtered = filterProducts(term, tagFilter, sizeFilter, priceMin, priceMax, activeCategorySlug);
   renderProducts(filtered);
   updateAppliedFilters();
 }
@@ -1660,7 +1712,7 @@ function handleFilterChange() {
   const sizeFilter = document.getElementById("filter-size")?.value || "";
   const priceMin = document.getElementById("filter-price-min")?.value || null;
   const priceMax = document.getElementById("filter-price-max")?.value || null;
-  const filtered = filterProducts(searchTerm, tagFilter, sizeFilter, priceMin, priceMax);
+  const filtered = filterProducts(searchTerm, tagFilter, sizeFilter, priceMin, priceMax, activeCategorySlug);
   renderProducts(filtered);
   updateAppliedFilters();
 }
@@ -1669,12 +1721,12 @@ function handleFilterChange() {
 // INITIALIZATION
 // ============================================================================
 async function init() {
-  // Apply CONFIG colors to CSS variables (sync with design system)
+  showProductSkeleton(8);
+
   document.documentElement.style.setProperty("--primary-color", CONFIG.PRIMARY_COLOR);
   document.documentElement.style.setProperty("--color-accent", CONFIG.ACCENT_COLOR);
   document.documentElement.style.setProperty("--accent-color", CONFIG.ACCENT_COLOR);
-  
-  // Update store name (header + footer)
+
   const storeNameEl = document.getElementById("store-name");
   const footerBrandEl = document.getElementById("footer-store-name");
   const footerCopyName = document.getElementById("footer-store-name-copy");
@@ -1683,11 +1735,9 @@ async function init() {
   if (footerCopyName) footerCopyName.textContent = CONFIG.STORE_NAME;
   const yearSpan = document.getElementById("footer-year");
   if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-  
-  // Update page title
-  document.title = `${CONFIG.STORE_NAME} - منتجات عالية الجودة`;
-  
-  // Load products from JSON file
+
+  document.title = CONFIG.STORE_NAME + ' - منتجات عالية الجودة';
+
   await loadProducts();
   
   // Populate filters and wilaya (after products loaded)
@@ -1792,38 +1842,54 @@ if (document.readyState === "loading") {
 }
 
 // ============================================================================
-// CATEGORY TABS — appended below all existing code, no changes above
+// CATEGORY TABS — order: الكل then تيشيرتات، قمصان، بناطيل، كنزات، جاكيتات، بدل، ملابس رياضية، إكسسوارات
 // ============================================================================
 let activeCategorySlug = '';
+
+var PREFERRED_CATEGORY_SLUG_ORDER = ['tshirts', 'shirts', 'trousers', 'knitwear', 'jackets', 'suits', 'sportswear', 'accessories'];
 
 function buildCategoryTabs() {
   const container = document.getElementById('category-tabs');
   if (!container) return;
 
-  const catMap = new Map();
-  PRODUCTS.forEach(p => { if (p.category?.id) catMap.set(p.category.id, p.category); });
-  const categories = Array.from(catMap.values());
+  const bySlug = new Map();
+  PRODUCTS.forEach(p => {
+    if (p.category && (p.category.slug || p.category.name)) {
+      var slug = (p.category.slug || '').toLowerCase();
+      if (!bySlug.has(slug)) bySlug.set(slug, { slug: slug, name: p.category.name || slug });
+    }
+  });
+
+  var ordered = [];
+  PREFERRED_CATEGORY_SLUG_ORDER.forEach(s => {
+    if (bySlug.has(s)) ordered.push(bySlug.get(s));
+  });
+  bySlug.forEach(function (cat, slug) {
+    if (PREFERRED_CATEGORY_SLUG_ORDER.indexOf(slug) === -1) ordered.push(cat);
+  });
 
   container.innerHTML = '';
 
-  // "All" tab
-  const allTab = document.createElement('button');
+  var allCount = PRODUCTS.length;
+  var allTab = document.createElement('button');
   allTab.className = 'category-tab active';
   allTab.dataset.slug = '';
   allTab.setAttribute('role', 'tab');
   allTab.setAttribute('aria-selected', 'true');
-  allTab.textContent = 'الكل';
-  allTab.addEventListener('click', () => onTabClick('', allTab));
+  allTab.innerHTML = 'الكل <span class="tab-count">(' + allCount + ')</span>';
+  allTab.addEventListener('click', function () { onTabClick('', allTab); });
   container.appendChild(allTab);
 
-  categories.forEach(cat => {
-    const tab = document.createElement('button');
+  ordered.forEach(function (cat) {
+    var slug = cat.slug;
+    var count = PRODUCTS.filter(function (p) { return p.category && (p.category.slug || '').toLowerCase() === slug; }).length;
+    var tab = document.createElement('button');
     tab.className = 'category-tab';
-    tab.dataset.slug = cat.slug;
+    tab.dataset.slug = slug;
     tab.setAttribute('role', 'tab');
     tab.setAttribute('aria-selected', 'false');
-    tab.textContent = cat.name;
-    tab.addEventListener('click', () => onTabClick(cat.slug, tab));
+    tab.innerHTML = escapeHtml(cat.name) + ' <span class="tab-count">(' + count + ')</span>';
+    tab.addEventListener('click', function () { onTabClick(slug, tab); });
     container.appendChild(tab);
   });
 }
@@ -1834,22 +1900,16 @@ function onTabClick(slug, clickedTab) {
     t.classList.toggle('active', t === clickedTab);
     t.setAttribute('aria-selected', t === clickedTab ? 'true' : 'false');
   });
-  // Sync the existing dropdown filter
-  const tagFilter = document.getElementById('filter-tag');
-  if (tagFilter) {
-    const opt = Array.from(tagFilter.options).find(o => o.value === slug);
-    tagFilter.value = opt ? slug : '';
-  }
   applyAllFilters();
 }
 
 function applyAllFilters() {
   const search   = document.getElementById('search-input')?.value || '';
-  const tag      = document.getElementById('filter-tag')?.value || activeCategorySlug || '';
+  const tag      = document.getElementById('filter-tag')?.value || '';
   const size     = document.getElementById('filter-size')?.value || '';
   const priceMin = document.getElementById('filter-price-min')?.value || null;
   const priceMax = document.getElementById('filter-price-max')?.value || null;
-  renderProducts(filterProducts(search, tag, size, priceMin, priceMax));
+  renderProducts(filterProducts(search, tag, size, priceMin, priceMax, activeCategorySlug));
   updateAppliedFilters();
 }
 
@@ -1874,16 +1934,6 @@ function animateCounters() {
   requestAnimationFrame(step);
 }
 
-// Override handleFilterChange so dropdown also syncs the tabs
 window.handleFilterChange = function() {
-  const dropVal = document.getElementById('filter-tag')?.value || '';
-  if (dropVal !== activeCategorySlug) {
-    activeCategorySlug = dropVal;
-    document.querySelectorAll('.category-tab').forEach(t => {
-      const active = t.dataset.slug === activeCategorySlug;
-      t.classList.toggle('active', active);
-      t.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
-  }
   applyAllFilters();
 };
