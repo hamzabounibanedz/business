@@ -25,6 +25,9 @@ async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
+    // Note: count check and delete are not atomic.
+    // Acceptable for single-admin use — the DB FK constraint will catch any race condition
+    // and return a 23503 FK violation which sendError handles correctly.
     const { count, error: cErr } = await supabaseAdmin
       .from('products').select('id', { count: 'exact', head: true }).eq('category_id', id);
     if (cErr) return sendError(res, cErr);

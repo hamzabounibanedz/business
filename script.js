@@ -562,16 +562,31 @@ function renderProducts(products = PRODUCTS) {
       featBadge.textContent = 'مميز';
       imageDiv.appendChild(featBadge);
     }
-    const img = document.createElement('img');
-    img.src = sanitizeUrl((product.images && product.images[0]) || '');
-    img.alt = escapeHtml(name);
-    img.loading = index < 4 ? 'eager' : 'lazy';
-    img.addEventListener('load', () => img.classList.add('loaded'));
-    img.addEventListener('error', () => {
-      img.style.display = 'none';
-      imageDiv.style.background = 'var(--gradient-card)';
-    });
-    imageDiv.appendChild(img);
+    const imgSrc = (product.images && product.images.length > 0 && product.images[0])
+      ? sanitizeUrl(product.images[0])
+      : '';
+    if (imgSrc) {
+      const img = document.createElement('img');
+      img.src = imgSrc;
+      img.alt = escapeHtml(name || 'منتج');
+      img.loading = index < 4 ? 'eager' : 'lazy';
+      img.className = 'product-img';
+      img.addEventListener('load', () => img.classList.add('loaded'));
+      img.addEventListener('error', () => {
+        img.style.display = 'none';
+        imageDiv.classList.add('img-error');
+      });
+      imageDiv.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'product-img-placeholder';
+      placeholder.setAttribute('aria-label', 'لا توجد صورة');
+      const icon = document.createElement('span');
+      icon.className = 'placeholder-icon';
+      icon.textContent = '\u25FB';
+      placeholder.appendChild(icon);
+      imageDiv.appendChild(placeholder);
+    }
 
     const infoDiv = document.createElement('div');
     infoDiv.className = 'product-info';

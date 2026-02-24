@@ -1,5 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { parse } from 'cookie';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+if (!process.env.JWT_SECRET) {
+  config({ path: resolve(process.cwd(), '.env.local') });
+}
 
 const COOKIE_NAME = 'matjari_admin_token';
 const JWT_SECRET  = process.env.JWT_SECRET;

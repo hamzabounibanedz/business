@@ -13,12 +13,22 @@ async function handler(req, res) {
     return res.status(500).json({ success: false, error: 'Webhook URL not set' });
   }
 
-  const bodyString = req.body == null ? '' : JSON.stringify(req.body);
-  if (!bodyString || bodyString === '{}') {
+  const body = req.body;
+  if (!body || typeof body !== 'object') {
     return res.status(400).json({ success: false, error: 'Missing body' });
   }
 
-  const { items } = req.body || {};
+  const { items, customer } = body;
+  const name = customer?.firstName || customer?.lastName || body.name;
+  const phone = customer?.phone || body.phone;
+  const wilaya = customer?.wilaya || body.wilaya;
+  if (!name || !phone || !wilaya) {
+    return res.status(400).json({ success: false, error: 'الاسم والهاتف والولاية مطلوبة' });
+  }
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ success: false, error: 'عناصر الطلب مطلوبة' });
+  }
+  const bodyString = JSON.stringify(body);
 
   const response = await fetch(GOOGLE_WEBHOOK_URL, {
     method: 'POST',
@@ -48,7 +58,7 @@ async function handler(req, res) {
     }
     return res.status(200).json({ success: true });
   }
-  res.status(response.status).json(data);
+  return res.status(502).json({ success: false, error: 'فشل إرسال الطلب. يرجى المحاولة لاحقاً.', ...data });
 }
 
 export default catchAsync(handler);
