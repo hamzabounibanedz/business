@@ -1,43 +1,54 @@
 // Proxy for order submission (avoids CORS). Set GOOGLE_WEBHOOK_URL in Vercel.
 
+import { supabaseAdmin } from './_lib/supabase.js';
+import { catchAsync } from './_lib/catchAsync.js';
+import { allowMethods } from './_lib/guard.js';
+
 const GOOGLE_WEBHOOK_URL = process.env.GOOGLE_WEBHOOK_URL;
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ success: false, error: "Method not allowed" });
-  }
+async function handler(req, res) {
+  if (!allowMethods(req, res, 'POST')) return;
 
   if (!GOOGLE_WEBHOOK_URL) {
-    return res.status(500).json({ success: false, error: "Webhook URL not set" });
+    return res.status(500).json({ success: false, error: 'Webhook URL not set' });
   }
 
-  const body = req.body == null ? "" : (typeof req.body === "string" ? req.body : JSON.stringify(req.body));
-  if (!body) {
-    return res.status(400).json({ success: false, error: "Missing body" });
+  const bodyString = req.body == null ? '' : JSON.stringify(req.body);
+  if (!bodyString || bodyString === '{}') {
+    return res.status(400).json({ success: false, error: 'Missing body' });
   }
 
+  const { items } = req.body || {};
+
+  const response = await fetch(GOOGLE_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: bodyString,
+  });
+
+  const text = await response.text();
+  let data;
   try {
-    const response = await fetch(GOOGLE_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-    });
-
-    const text = await response.text();
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { success: response.ok, raw: text };
-    }
-
-    res.status(response.status).json(data);
-  } catch (err) {
-    console.error("Order proxy error:", err);
-    res.status(502).json({
-      success: false,
-      error: "Failed to reach order service",
-    });
+    data = JSON.parse(text);
+  } catch {
+    data = { success: response.ok, raw: text };
   }
+
+  if (response.ok) {
+    try {
+      if (Array.isArray(items) && items.length > 0) {
+        await Promise.allSettled(
+          items.map(item =>
+            supabaseAdmin.rpc('decrement_inventory', { p_id: item.id, qty: item.quantity })
+          )
+        );
+      }
+    } catch (stockErr) {
+      console.error('Stock decrement failed (order still recorded):', stockErr.message);
+    }
+    return res.status(200).json({ success: true });
+  }
+  res.status(response.status).json(data);
 }
+
+export default catchAsync(handler);

@@ -54,19 +54,24 @@ const PRODUCTS_FALLBACK = [
 
 async function loadProducts() {
   try {
-    const response = await fetch('products.json');
-    if (!response.ok) {
-      throw new Error(`Failed to load products: ${response.status}`);
-    }
+    const response = await fetch('/api/products');
+    if (!response.ok) throw new Error(`API ${response.status}`);
     const data = await response.json();
-    PRODUCTS = Array.isArray(data) ? data : (data.products || data.items || []);
+    PRODUCTS = Array.isArray(data) ? data : [];
+    if (typeof buildCategoryTabs === 'function') buildCategoryTabs();
     return PRODUCTS;
   } catch (error) {
-    console.warn('Products loaded from fallback (e.g. open via a local server to use products.json):', error.message);
-    PRODUCTS = PRODUCTS_FALLBACK.length ? PRODUCTS_FALLBACK : [];
-    if (PRODUCTS.length === 0) {
-      showNotification('فشل تحميل المنتجات. يرجى تحديث الصفحة.', true);
+    console.warn('Falling back to products.json:', error.message);
+    try {
+      const r = await fetch('products.json');
+      if (!r.ok) throw new Error('products.json failed');
+      const data = await r.json();
+      PRODUCTS = Array.isArray(data) ? data : (data.products || []);
+    } catch {
+      PRODUCTS = PRODUCTS_FALLBACK.length ? PRODUCTS_FALLBACK : [];
     }
+    if (typeof buildCategoryTabs === 'function') buildCategoryTabs();
+    if (PRODUCTS.length === 0) showNotification('فشل تحميل المنتجات. يرجى تحديث الصفحة.', true);
     return PRODUCTS;
   }
 }
@@ -179,16 +184,22 @@ function addItem(productId, size, qty = 1) {
     cart.push({
       key: itemKey,
       productId: productId,
-      name: product.name,
+      name: product.name_ar || product.name,
       sku: product.sku,
       size: size || "N/A",
       quantity: qty,
       price: product.price
     });
   }
-  
+
   saveCart(cart);
   updateCartUI();
+  const cartBtn = document.getElementById('cart-button');
+  if (cartBtn) {
+    cartBtn.classList.remove('added');
+    requestAnimationFrame(() => cartBtn.classList.add('added'));
+    setTimeout(() => cartBtn.classList.remove('added'), 500);
+  }
   return true;
 }
 
@@ -344,7 +355,11 @@ let searchTimeout = null;
 function debounceSearch(callback, delay = 300) {
   return function(...args) {
     clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => callback.apply(this, args), delay);
+    const searchBox = document.querySelector('.search-box');
+    if (searchBox) searchBox.classList.add('searching');
+    searchTimeout = setTimeout(() => {
+      callback.apply(this, args);
+    }, delay);
   };
 }
 
@@ -462,81 +477,100 @@ function renderProducts(products = PRODUCTS) {
   if (products.length === 0) {
     const noResults = document.createElement('div');
     noResults.className = 'no-results';
-    
     const heading = document.createElement('h3');
     heading.textContent = 'لم يتم العثور على منتجات';
-    
     const paragraph = document.createElement('p');
-    paragraph.textContent = 'جرّب تغيير البحث أو الفلاتر.';
-    
+    paragraph.textContent = 'جرّب تغيير كلمات البحث أو إزالة الفلاتر المطبقة';
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn btn-secondary';
+    clearBtn.textContent = 'مسح كل الفلاتر';
+    clearBtn.addEventListener('click', clearAllFilters);
     noResults.appendChild(heading);
     noResults.appendChild(paragraph);
+    noResults.appendChild(clearBtn);
     grid.appendChild(noResults);
     return;
   }
-  
-  products.forEach((product, index) => {
+
+  document.querySelector('.search-box')?.classList.remove('searching');
+
+  products.forEach((product) => {
+    const name = product.name_ar || product.name;
+    const desc = product.description_ar || product.description;
     const card = document.createElement('div');
     card.className = 'product-card';
+    if (product.inventory === 0) card.classList.add('product-card--out-of-stock');
     card.setAttribute('data-product-id', escapeHtml(product.id));
-    
+
     const imageDiv = document.createElement('div');
     imageDiv.className = 'product-image';
+    if (product.inventory > 0 && product.inventory <= 5) {
+      const lowBadge = document.createElement('span');
+      lowBadge.className = 'product-badge-low-stock';
+      lowBadge.textContent = 'آخر القطع';
+      imageDiv.appendChild(lowBadge);
+    }
+    if (product.isFeatured === true) {
+      const featBadge = document.createElement('span');
+      featBadge.className = 'product-badge-featured';
+      featBadge.textContent = 'مميز';
+      imageDiv.appendChild(featBadge);
+    }
     const img = document.createElement('img');
     img.src = sanitizeUrl((product.images && product.images[0]) || '');
-    img.alt = escapeHtml(product.name);
+    img.alt = escapeHtml(name);
     img.loading = 'lazy';
-    
-    // Handle image loading states
-    img.addEventListener('load', () => {
-      img.classList.add('loaded');
-    });
-    
+    img.addEventListener('load', () => img.classList.add('loaded'));
     img.addEventListener('error', () => {
       img.style.display = 'none';
-      // Show placeholder pattern
       imageDiv.style.background = 'var(--gradient-card)';
     });
-    
     imageDiv.appendChild(img);
-    
+
     const infoDiv = document.createElement('div');
     infoDiv.className = 'product-info';
-    
     const heading = document.createElement('h3');
-    heading.textContent = product.name;
-    
+    heading.textContent = name;
     const price = document.createElement('p');
     price.className = 'product-price';
-    price.textContent = `${product.price.toLocaleString()} ${CONFIG.CURRENCY}`;
-    
+    price.textContent = `${(Number(product.price) || 0).toLocaleString()} ${CONFIG.CURRENCY}`;
     const description = document.createElement('p');
     description.className = 'product-description';
-    description.textContent = product.description;
-    
+    description.textContent = desc || '';
+
+    const sizesPreview = (product.sizes && product.sizes.length) ? (() => {
+      const wrap = document.createElement('div');
+      wrap.className = 'product-sizes-preview';
+      product.sizes.forEach(s => {
+        const pill = document.createElement('span');
+        pill.className = 'product-size-pill';
+        pill.textContent = s;
+        wrap.appendChild(pill);
+      });
+      return wrap;
+    })() : null;
+
     const actions = document.createElement('div');
     actions.className = 'product-actions';
-    
     const viewBtn = document.createElement('button');
     viewBtn.className = 'btn btn-secondary';
     viewBtn.textContent = 'عرض التفاصيل';
-    viewBtn.setAttribute('aria-label', `عرض تفاصيل ${product.name}`);
+    viewBtn.setAttribute('aria-label', 'عرض تفاصيل ' + name);
     viewBtn.addEventListener('click', () => openProductModal(product.id));
-    
     const addBtn = document.createElement('button');
     addBtn.className = 'btn btn-primary';
     addBtn.textContent = 'أضف إلى السلة';
-    addBtn.setAttribute('aria-label', `إضافة ${product.name} إلى السلة`);
+    addBtn.setAttribute('aria-label', 'إضافة ' + name + ' إلى السلة');
     addBtn.addEventListener('click', () => quickAddToCart(product.id));
-    
     actions.appendChild(viewBtn);
     actions.appendChild(addBtn);
-    
+
     infoDiv.appendChild(heading);
     infoDiv.appendChild(price);
     infoDiv.appendChild(description);
+    if (sizesPreview) infoDiv.appendChild(sizesPreview);
     infoDiv.appendChild(actions);
-    
     card.appendChild(imageDiv);
     card.appendChild(infoDiv);
     grid.appendChild(card);
@@ -552,10 +586,16 @@ function renderCart() {
   
   const cart = getCart();
   const totals = getTotals();
-  
+
+  const cartTitleEl = document.getElementById('cart-modal-title');
+  if (cartTitleEl) {
+    if (cart.length === 0) cartTitleEl.textContent = 'سلتك';
+    else cartTitleEl.textContent = 'سلتك (' + cart.reduce((s, i) => s + i.quantity, 0).toLocaleString('ar-DZ') + ')';
+  }
+
   // Clear cart items
   cartItemsEl.textContent = '';
-  
+
   if (cart.length === 0) {
     const emptyDiv = document.createElement('div');
     emptyDiv.className = 'cart-empty';
@@ -791,11 +831,11 @@ function renderProductModal(productId) {
   form.id = 'product-modal-form';
   form.addEventListener('submit', (e) => handleModalAddToCart(e, product.id));
   
-  // Size selector
+  // Size selector with size guide tooltip
   if (product.sizes && product.sizes.length > 0) {
     const sizeSelector = document.createElement('div');
     sizeSelector.className = 'size-selector';
-    
+
     const sizeLabel = document.createElement('label');
     sizeLabel.setAttribute('for', 'modal-size');
     sizeLabel.textContent = 'المقاس ';
@@ -803,39 +843,47 @@ function renderProductModal(productId) {
     requiredSpan.className = 'required';
     requiredSpan.textContent = '*';
     sizeLabel.appendChild(requiredSpan);
-    
+    const guideTrigger = document.createElement('span');
+    guideTrigger.className = 'size-guide-trigger';
+    guideTrigger.setAttribute('tabindex', '0');
+    guideTrigger.setAttribute('aria-label', 'دليل المقاسات');
+    guideTrigger.textContent = '؟';
+    sizeLabel.appendChild(guideTrigger);
+    const tooltip = document.createElement('div');
+    tooltip.className = 'size-guide-tooltip';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.innerHTML = '<table class="size-guide-table"><thead><tr><th>المقاس</th><th>الصدر (سم)</th><th>الخصر (سم)</th></tr></thead><tbody><tr><td>S</td><td>88-92</td><td>73-77</td></tr><tr><td>M</td><td>93-97</td><td>78-82</td></tr><tr><td>L</td><td>98-103</td><td>83-88</td></tr><tr><td>XL</td><td>104-109</td><td>89-94</td></tr><tr><td>XXL</td><td>110-116</td><td>95-101</td></tr></tbody></table>';
+    sizeLabel.appendChild(tooltip);
+
     const sizeSelect = document.createElement('select');
     sizeSelect.id = 'modal-size';
     sizeSelect.required = true;
     sizeSelect.setAttribute('aria-required', 'true');
     sizeSelect.setAttribute('aria-invalid', 'false');
-    
+
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = 'اختر المقاس';
     sizeSelect.appendChild(defaultOption);
-    
+
     product.sizes.forEach(size => {
       const option = document.createElement('option');
       option.value = escapeHtml(size);
       option.textContent = size;
       sizeSelect.appendChild(option);
     });
-    
-    // Clear error on change
+
     sizeSelect.addEventListener('change', () => {
       sizeSelect.removeAttribute("aria-invalid");
       sizeSelect.classList.remove("error");
-      const errorMsg = sizeSelect.parentElement.querySelector(".error-message");
-      if (errorMsg) {
-        errorMsg.classList.remove("show");
-      }
+      const err = sizeSelect.parentElement.querySelector(".error-message");
+      if (err) err.classList.remove("show");
     });
-    
+
     const errorMsg = document.createElement('span');
     errorMsg.className = 'error-message';
     errorMsg.setAttribute('role', 'alert');
-    
+
     sizeSelector.appendChild(sizeLabel);
     sizeSelector.appendChild(sizeSelect);
     sizeSelector.appendChild(errorMsg);
@@ -1086,16 +1134,35 @@ function handleBuyNow(productId) {
     closeProductModal();
     openCart();
   } else {
-    showNotification("Failed to add item", true);
+    showNotification("فشل في إضافة المنتج", true);
   }
 }
 
+const modalQtyLimitMsg = 'الحد الأقصى المتاح';
+
 function incrementModalQty() {
   const input = document.getElementById("modal-quantity");
-  if (input) {
-    const max = input.max ? parseInt(input.max) : Infinity;
-    const current = parseInt(input.value) || 1;
-    input.value = Math.min(current + 1, max);
+  if (!input) return;
+  const max = input.max ? parseInt(input.max) : Infinity;
+  const current = parseInt(input.value) || 1;
+  const next = Math.min(current + 1, max);
+  input.value = next;
+  let hint = input.parentElement.querySelector(".qty-limit-hint");
+  if (next >= max && max !== Infinity) {
+    if (!hint) {
+      hint = document.createElement("span");
+      hint.className = "qty-limit-hint";
+      hint.style.fontSize = "0.75rem";
+      hint.style.color = "var(--color-ink-muted)";
+      hint.style.marginTop = "4px";
+      hint.style.display = "block";
+      input.parentElement.appendChild(hint);
+    }
+    hint.textContent = modalQtyLimitMsg;
+    hint.classList.add("show");
+  } else if (hint) {
+    hint.textContent = "";
+    hint.classList.remove("show");
   }
 }
 
@@ -1137,7 +1204,10 @@ function closeCart() {
 
 // Wrapper functions for event handlers - kept for backward compatibility with HTML
 function updateCartQty(itemKey, newQty) {
-  updateQty(itemKey, newQty);
+  const ok = updateQty(itemKey, newQty);
+  if (ok === false) {
+    showNotification('لا يمكن تجاوز الكمية المتوفرة في المخزون.', true);
+  }
 }
 
 function removeCartItem(itemKey) {
@@ -1318,52 +1388,74 @@ function handleCheckoutSubmit(event) {
 function showOrderSuccess(orderId, payload) {
   const modal = document.getElementById("success-modal");
   if (!modal) return;
-  
-  const itemCount = payload.items.reduce((sum, item) => sum + item.quantity, 0);
-  
-  // Clear modal
-  modal.textContent = '';
-  
-  const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content success-modal-content';
-  
-  const heading = document.createElement('h2');
+
+  modal.textContent = "";
+
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content success-modal-content";
+
+  const checkEl = document.createElement("span");
+  checkEl.className = "success-check";
+  checkEl.textContent = "✓";
+  checkEl.setAttribute("aria-hidden", "true");
+
+  const heading = document.createElement("h2");
+  heading.id = "success-modal-title";
   heading.textContent = CONFIG.SUCCESS_MESSAGE;
-  
-  const orderIdP = document.createElement('p');
-  orderIdP.textContent = 'رقم الطلب: ';
-  const orderIdStrong = document.createElement('strong');
+
+  const followup = document.createElement("p");
+  followup.className = "success-followup";
+  followup.textContent = "سيتم التواصل معك خلال 24 ساعة لتأكيد الطلب";
+
+  const orderIdP = document.createElement("p");
+  orderIdP.textContent = "رقم الطلب: ";
+  const orderIdStrong = document.createElement("strong");
   orderIdStrong.textContent = orderId;
   orderIdP.appendChild(orderIdStrong);
-  
-  const totalP = document.createElement('p');
-  totalP.textContent = 'الإجمالي: ';
-  const totalStrong = document.createElement('strong');
-  totalStrong.textContent = `${payload.total.toLocaleString()} ${CONFIG.CURRENCY}`;
+
+  const itemsWrap = document.createElement("div");
+  itemsWrap.className = "success-order-items";
+  payload.items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "success-order-item";
+    row.innerHTML = "<span>" + escapeHtml(item.name) + " — " + escapeHtml(item.size) + " × " + item.quantity + "</span><span>" + (item.price * item.quantity).toLocaleString() + " " + CONFIG.CURRENCY + "</span>";
+    itemsWrap.appendChild(row);
+  });
+
+  const totalP = document.createElement("p");
+  totalP.textContent = "الإجمالي: ";
+  const totalStrong = document.createElement("strong");
+  totalStrong.textContent = payload.total.toLocaleString() + " " + CONFIG.CURRENCY;
   totalP.appendChild(totalStrong);
-  
-  const itemsP = document.createElement('p');
-  itemsP.textContent = 'المنتجات: ';
-  const itemsStrong = document.createElement('strong');
-  itemsStrong.textContent = itemCount.toString();
-  itemsP.appendChild(itemsStrong);
-  
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'btn btn-primary';
-  closeBtn.textContent = 'إغلاق';
-  closeBtn.addEventListener('click', closeSuccessModal);
-  
+
+  const continueBtn = document.createElement("button");
+  continueBtn.type = "button";
+  continueBtn.className = "btn btn-primary";
+  continueBtn.textContent = "متابعة التسوق";
+  continueBtn.addEventListener("click", () => {
+    closeSuccessModal();
+    document.getElementById("products-section")?.scrollIntoView({ behavior: "smooth" });
+  });
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "btn btn-secondary";
+  closeBtn.textContent = "إغلاق";
+  closeBtn.addEventListener("click", closeSuccessModal);
+
+  modalContent.appendChild(checkEl);
   modalContent.appendChild(heading);
+  modalContent.appendChild(followup);
   modalContent.appendChild(orderIdP);
+  modalContent.appendChild(itemsWrap);
   modalContent.appendChild(totalP);
-  modalContent.appendChild(itemsP);
+  modalContent.appendChild(continueBtn);
   modalContent.appendChild(closeBtn);
-  
+
   modal.appendChild(modalContent);
   modal.classList.add("active");
   modal.setAttribute("aria-hidden", "false");
   modal.setAttribute("aria-labelledby", "success-modal-title");
-  heading.id = "success-modal-title";
   document.body.style.overflow = "hidden";
 }
 
@@ -1422,13 +1514,23 @@ function getCurrentFilterState() {
 
 function updateAppliedFilters() {
   const container = document.getElementById("applied-filters");
-  if (!container) return;
+  const countBadge = document.getElementById("filter-active-count");
   const state = getCurrentFilterState();
   const hasSearch = state.search.length > 0;
   const hasTag = state.tag.length > 0;
   const hasSize = state.size.length > 0;
   const hasPrice = (state.priceMin !== "" || state.priceMax !== "");
   const activeCount = [hasSearch, hasTag, hasSize, hasPrice].filter(Boolean).length;
+  if (countBadge) {
+    if (activeCount === 0) {
+      countBadge.style.display = "none";
+      countBadge.textContent = "";
+    } else {
+      countBadge.textContent = activeCount;
+      countBadge.style.display = "flex";
+    }
+  }
+  if (!container) return;
   if (activeCount === 0) {
     container.textContent = "";
     return;
@@ -1519,8 +1621,8 @@ function clearAllFilters() {
   if (sizeSelect) sizeSelect.value = "";
   if (priceMin) priceMin.value = "";
   if (priceMax) priceMax.value = "";
-  renderProducts(PRODUCTS);
-  updateAppliedFilters();
+  // Use handleFilterChange so category tab bar also resets (stays in sync)
+  handleFilterChange();
 }
 
 function handleSearch(event) {
@@ -1625,7 +1727,8 @@ async function init() {
   updateAppliedFilters();
   updateCartUI();
   toggleSearchClear();
-  
+  animateCounters();
+
   // Handle deep linking
   const urlParams = new URLSearchParams(window.location.search);
   const productParam = urlParams.get("product");
@@ -1687,3 +1790,100 @@ if (document.readyState === "loading") {
 } else {
   init();
 }
+
+// ============================================================================
+// CATEGORY TABS — appended below all existing code, no changes above
+// ============================================================================
+let activeCategorySlug = '';
+
+function buildCategoryTabs() {
+  const container = document.getElementById('category-tabs');
+  if (!container) return;
+
+  const catMap = new Map();
+  PRODUCTS.forEach(p => { if (p.category?.id) catMap.set(p.category.id, p.category); });
+  const categories = Array.from(catMap.values());
+
+  container.innerHTML = '';
+
+  // "All" tab
+  const allTab = document.createElement('button');
+  allTab.className = 'category-tab active';
+  allTab.dataset.slug = '';
+  allTab.setAttribute('role', 'tab');
+  allTab.setAttribute('aria-selected', 'true');
+  allTab.textContent = 'الكل';
+  allTab.addEventListener('click', () => onTabClick('', allTab));
+  container.appendChild(allTab);
+
+  categories.forEach(cat => {
+    const tab = document.createElement('button');
+    tab.className = 'category-tab';
+    tab.dataset.slug = cat.slug;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-selected', 'false');
+    tab.textContent = cat.name;
+    tab.addEventListener('click', () => onTabClick(cat.slug, tab));
+    container.appendChild(tab);
+  });
+}
+
+function onTabClick(slug, clickedTab) {
+  activeCategorySlug = slug;
+  document.querySelectorAll('.category-tab').forEach(t => {
+    t.classList.toggle('active', t === clickedTab);
+    t.setAttribute('aria-selected', t === clickedTab ? 'true' : 'false');
+  });
+  // Sync the existing dropdown filter
+  const tagFilter = document.getElementById('filter-tag');
+  if (tagFilter) {
+    const opt = Array.from(tagFilter.options).find(o => o.value === slug);
+    tagFilter.value = opt ? slug : '';
+  }
+  applyAllFilters();
+}
+
+function applyAllFilters() {
+  const search   = document.getElementById('search-input')?.value || '';
+  const tag      = document.getElementById('filter-tag')?.value || activeCategorySlug || '';
+  const size     = document.getElementById('filter-size')?.value || '';
+  const priceMin = document.getElementById('filter-price-min')?.value || null;
+  const priceMax = document.getElementById('filter-price-max')?.value || null;
+  renderProducts(filterProducts(search, tag, size, priceMin, priceMax));
+  updateAppliedFilters();
+}
+
+function animateCounters() {
+  const counters = document.querySelectorAll(".hero-stat-number[data-target]");
+  if (!counters.length) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    counters.forEach(c => { c.textContent = c.dataset.target; });
+    return;
+  }
+  const duration = 1800;
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    counters.forEach(c => {
+      const target = parseInt(c.dataset.target, 10);
+      c.textContent = Math.round(ease * target).toLocaleString("ar-DZ");
+    });
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// Override handleFilterChange so dropdown also syncs the tabs
+window.handleFilterChange = function() {
+  const dropVal = document.getElementById('filter-tag')?.value || '';
+  if (dropVal !== activeCategorySlug) {
+    activeCategorySlug = dropVal;
+    document.querySelectorAll('.category-tab').forEach(t => {
+      const active = t.dataset.slug === activeCategorySlug;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  }
+  applyAllFilters();
+};

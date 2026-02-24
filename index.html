@@ -45,10 +45,10 @@
 
   <main id="main">
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="hero-title">
     <div class="container">
       <p class="hero-tagline">مرحباً بكم في</p>
-      <h2 class="hero-title">ملابس بجودة ممتازة</h2>
+      <h2 id="hero-title" class="hero-title">ملابس بجودة ممتازة</h2>
       <p class="hero-subtitle">تشكيلات مختارة للحياة اليومية. أقمشة مريحة، أسعار مناسبة، وتوصيل سريع إلى كل ولاية.</p>
       <div class="hero-trust">
         <span class="hero-trust-item">توصيل لجميع الولايات</span>
@@ -65,19 +65,43 @@
           عرض السلة
         </button>
       </div>
+      <div class="hero-stats" aria-hidden="true">
+        <div class="hero-stat">
+          <span class="hero-stat-number" data-target="58">0</span>
+          <span class="hero-stat-label">ولاية نوصلها</span>
+        </div>
+        <span class="hero-stat-divider" aria-hidden="true"></span>
+        <div class="hero-stat">
+          <span class="hero-stat-number" data-target="100">0</span>
+          <span class="hero-stat-label">% ضمان الجودة</span>
+        </div>
+        <span class="hero-stat-divider" aria-hidden="true"></span>
+        <div class="hero-stat">
+          <span class="hero-stat-number" data-target="24">0</span>
+          <span class="hero-stat-label">ساعة معالجة</span>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Products Section -->
-  <section id="products-section" class="products-section">
+  <section id="products-section" class="products-section" aria-labelledby="products-section-title">
     <div class="container">
-      <h2 class="section-title">منتجاتنا</h2>
+      <h2 id="products-section-title" class="section-title">منتجاتنا</h2>
+
+      <!-- Category Tabs — populated dynamically after products load -->
+      <div class="category-tabs-wrapper" role="tablist" aria-label="تصفية حسب التصنيف">
+        <div id="category-tabs" class="category-tabs">
+          <!-- Built by buildCategoryTabs() in script.js -->
+        </div>
+      </div>
       
       <!-- Search & Filters (all in one line) -->
       <div class="filters-container">
         <div class="filters-row">
           <div class="filter-group filter-group--search">
             <label for="search-input" class="search-label">بحث</label>
+            <span class="filter-active-count" id="filter-active-count" style="display: none;" aria-hidden="true"></span>
             <div class="search-box" role="search">
               <svg class="search-box-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/>
@@ -180,7 +204,7 @@
       </div>
       
       <!-- Checkout Form -->
-      <form id="checkout-form" class="checkout-form" onsubmit="handleCheckoutSubmit(event)">
+      <form id="checkout-form" class="checkout-form" novalidate onsubmit="handleCheckoutSubmit(event)">
         <h3>معلومات الطلب</h3>
         
         <div class="form-row">
@@ -195,7 +219,7 @@
               aria-required="true"
               aria-invalid="false"
             >
-            <span class="error-message" id="error-firstname" role="alert"></span>
+            <span class="error-message" id="error-firstname"></span>
           </div>
           
           <div class="form-group">
@@ -209,7 +233,7 @@
               aria-required="true"
               aria-invalid="false"
             >
-            <span class="error-message" id="error-lastname" role="alert"></span>
+            <span class="error-message" id="error-lastname"></span>
           </div>
         </div>
         
@@ -225,7 +249,7 @@
             aria-required="true"
             aria-invalid="false"
           >
-          <span class="error-message" id="error-email" role="alert"></span>
+          <span class="error-message" id="error-email"></span>
         </div>
         
         <div class="form-group form-group--phone">
@@ -266,7 +290,7 @@
               aria-invalid="false"
             >
           </div>
-          <span class="error-message" id="error-phone" role="alert"></span>
+          <span class="error-message" id="error-phone"></span>
         </div>
         
         <div class="form-group">
@@ -275,7 +299,7 @@
             <option value="">اختر الولاية</option>
             <!-- Options populated by script.js -->
           </select>
-          <span class="error-message" id="error-wilaya" role="alert"></span>
+          <span class="error-message" id="error-wilaya"></span>
         </div>
         
         <div class="form-group">
@@ -290,7 +314,7 @@
             aria-required="true"
             aria-invalid="false"
           ></textarea>
-          <span class="error-message" id="error-address" role="alert"></span>
+          <span class="error-message" id="error-address"></span>
         </div>
         
         <div class="form-group">
