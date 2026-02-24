@@ -1,37 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Shop quality products online - Fast delivery across Algeria">
-  <meta name="theme-color" content="#1e40af">
+  <meta name="description" content="تسوق منتجات عالية الجودة أونلاين — توصيل سريع في كل أنحاء الجزائر">
+  <meta name="theme-color" content="#18181A">
   <!-- Security Headers -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <!-- EDIT META TAGS BELOW -->
-  <meta property="og:title" content="My Store - Quality Products">
-  <meta property="og:description" content="Shop quality products online - Fast delivery across Algeria">
+  <meta property="og:title" content="متجري — منتجات عالية الجودة">
+  <meta property="og:description" content="تسوق منتجات عالية الجودة أونلاين — توصيل سريع في كل أنحاء الجزائر">
   <meta property="og:type" content="website">
-  <title>My Store - Quality Products</title>
+  <title>متجري — منتجات عالية الجودة</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Skip to main content link for accessibility (keyboard/screen reader) -->
-  <a href="#main" class="skip-link">Skip to main content</a>
+  <a href="#main" class="skip-link">انتقل إلى المحتوى الرئيسي</a>
   
   <!-- Header -->
   <header class="header">
     <div class="container">
-      <a href="#" class="logo-link" onclick="event.preventDefault(); window.scrollTo({top: 0, behavior: 'smooth'});" aria-label="Go to homepage">
-        <h1 class="logo" id="store-name">My Store</h1>
+      <a href="#" class="logo-link" onclick="event.preventDefault(); window.scrollTo({top: 0, behavior: 'smooth'});" aria-label="الانتقال إلى الصفحة الرئيسية">
+        <h1 class="logo" id="store-name">متجري</h1>
       </a>
-      <nav class="header-nav" aria-label="Main navigation">
-        <a href="#products-section" class="nav-link">Shop</a>
-        <button class="cart-icon-btn" onclick="openCart()" aria-label="Open cart" aria-expanded="false" id="cart-button">
+      <nav class="header-nav" aria-label="القائمة الرئيسية">
+        <a href="#products-section" class="nav-link">المتجر</a>
+        <button class="cart-icon-btn" onclick="openCart()" aria-label="فتح السلة" aria-expanded="false" id="cart-button">
           <svg class="cart-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
             <line x1="3" y1="6" x2="21" y2="6"/>
@@ -47,48 +47,23 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <p class="hero-tagline">Welcome to</p>
-      <h2 class="hero-title">Premium Quality Clothing</h2>
-      <p class="hero-subtitle">Curated styles for everyday life. Comfortable fabrics, honest prices, and fast delivery to every wilaya.</p>
+      <p class="hero-tagline">مرحباً بكم في</p>
+      <h2 class="hero-title">ملابس بجودة ممتازة</h2>
+      <p class="hero-subtitle">تشكيلات مختارة للحياة اليومية. أقمشة مريحة، أسعار مناسبة، وتوصيل سريع إلى كل ولاية.</p>
       <div class="hero-trust">
-        <span class="hero-trust-item">Nationwide delivery</span>
+        <span class="hero-trust-item">توصيل لجميع الولايات</span>
         <span class="hero-trust-dot" aria-hidden="true">·</span>
-        <span class="hero-trust-item">Quality guarantee</span>
+        <span class="hero-trust-item">ضمان الجودة</span>
         <span class="hero-trust-dot" aria-hidden="true">·</span>
-        <span class="hero-trust-item">Secure checkout</span>
+        <span class="hero-trust-item">دفع آمن</span>
       </div>
       <div class="hero-cta-group">
-        <button class="btn btn-primary btn-large" onclick="var s=document.getElementById('products-section');var i=document.getElementById('search-input');if(s){s.scrollIntoView({behavior:'smooth'});if(i)setTimeout(function(){i.focus();},400);}" aria-label="Browse our products">
-          Shop Now
+        <button class="btn btn-primary btn-large" onclick="var s=document.getElementById('products-section');var i=document.getElementById('search-input');if(s){s.scrollIntoView({behavior:'smooth'});if(i)setTimeout(function(){i.focus();},400);}" aria-label="تصفح منتجاتنا">
+          تسوق الآن
         </button>
-        <button class="btn btn-secondary btn-large" onclick="openCart()" aria-label="View your cart">
-          View Cart
+        <button class="btn btn-secondary btn-large" onclick="openCart()" aria-label="عرض السلة">
+          عرض السلة
         </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Brand / Why Us Section -->
-  <section class="brand-section" aria-labelledby="brand-heading">
-    <div class="container">
-      <h2 id="brand-heading" class="section-title">Why Shop With Us</h2>
-      <p class="brand-intro">We believe in simple, reliable shopping—no fuss, just quality products and service you can count on.</p>
-      <div class="brand-features">
-        <div class="brand-feature">
-          <span class="brand-feature-icon brand-feature-icon--delivery" aria-hidden="true"></span>
-          <h3 class="brand-feature-title">Fast Delivery</h3>
-          <p class="brand-feature-text">Quick shipping across all 58 wilayas. Track your order every step of the way.</p>
-        </div>
-        <div class="brand-feature">
-          <span class="brand-feature-icon brand-feature-icon--quality" aria-hidden="true"></span>
-          <h3 class="brand-feature-title">Quality First</h3>
-          <p class="brand-feature-text">Carefully selected materials and construction. We stand behind every product.</p>
-        </div>
-        <div class="brand-feature">
-          <span class="brand-feature-icon brand-feature-icon--secure" aria-hidden="true"></span>
-          <h3 class="brand-feature-title">Secure & Simple</h3>
-          <p class="brand-feature-text">Safe checkout and clear pricing. No hidden fees—what you see is what you pay.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -96,58 +71,81 @@
   <!-- Products Section -->
   <section id="products-section" class="products-section">
     <div class="container">
-      <h2 class="section-title">Our Products</h2>
+      <h2 class="section-title">منتجاتنا</h2>
       
-      <!-- Search & Filters (prominent search for quick discovery) -->
+      <!-- Search & Filters (all in one line) -->
       <div class="filters-container">
-        <label for="search-input" class="search-label">Search products</label>
-        <div class="search-box">
-          <svg class="search-box-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Search by name, category..." 
-            aria-label="Search products by name or category"
-            oninput="debouncedSearch(event)"
-            autocomplete="off"
-          >
-        </div>
-        <div id="applied-filters" class="applied-filters" aria-live="polite" aria-label="Active filters"></div>
-        <div class="filters-grid">
+        <div class="filters-row">
+          <div class="filter-group filter-group--search">
+            <label for="search-input" class="search-label">بحث</label>
+            <div class="search-box" role="search">
+              <svg class="search-box-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input 
+                type="search" 
+                id="search-input" 
+                placeholder="ابحث بالاسم أو التصنيف..." 
+                aria-label="البحث عن المنتجات بالاسم أو التصنيف"
+                aria-describedby="search-clear-desc"
+                oninput="debouncedSearch(event); toggleSearchClear();"
+                onfocus="toggleSearchClear();"
+                onblur="toggleSearchClear();"
+                autocomplete="off"
+                enterkeyhint="search"
+              >
+              <button type="button" class="search-clear" id="search-clear-btn" onclick="clearSearch();" aria-label="مسح البحث" title="مسح البحث">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+              <span id="search-clear-desc" class="sr-only">اضغط Escape للمسح</span>
+            </div>
+          </div>
           <div class="filter-group">
-            <label for="filter-tag">Category</label>
+            <label for="filter-tag">التصنيف</label>
             <select id="filter-tag" onchange="handleFilterChange()">
-              <option value="">All Categories</option>
+              <option value="">الكل</option>
             </select>
           </div>
-          
           <div class="filter-group">
-            <label for="filter-size">Size</label>
+            <label for="filter-size">المقاس</label>
             <select id="filter-size" onchange="handleFilterChange()">
-              <option value="">All Sizes</option>
+              <option value="">الكل</option>
             </select>
-          </div>
-          
-          <div class="filter-group">
-            <label for="filter-price-min">Min Price</label>
-            <input type="number" id="filter-price-min" placeholder="Min" onchange="handleFilterChange()">
-          </div>
-          
-          <div class="filter-group">
-            <label for="filter-price-max">Max Price</label>
-            <input type="number" id="filter-price-max" placeholder="Max" onchange="handleFilterChange()">
           </div>
         </div>
-        
+        <div id="applied-filters" class="applied-filters" aria-live="polite" aria-label="الفلاتر النشطة"></div>
         <p id="result-count" class="result-count"></p>
       </div>
       
       <!-- Product Grid -->
       <div id="product-grid" class="product-grid">
         <!-- Products rendered dynamically by script.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Brand / Why Us Section -->
+  <section class="brand-section" aria-labelledby="brand-heading">
+    <div class="container">
+      <h2 id="brand-heading" class="section-title">لماذا تتسوق معنا</h2>
+      <p class="brand-intro">نؤمن بالتسوق البسيط والموثوق — بدون تعقيد، فقط منتجات ذات جودة وخدمة يمكنك الاعتماد عليها.</p>
+      <div class="brand-features">
+        <div class="brand-feature">
+          <span class="brand-feature-icon brand-feature-icon--delivery" aria-hidden="true"></span>
+          <h3 class="brand-feature-title">توصيل سريع</h3>
+          <p class="brand-feature-text">شحن سريع لجميع الـ 58 ولاية. تتبع طلبك في كل خطوة.</p>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature-icon brand-feature-icon--quality" aria-hidden="true"></span>
+          <h3 class="brand-feature-title">الجودة أولاً</h3>
+          <p class="brand-feature-text">مواد وتصنيع مختار بعناية. نضمن كل منتج نقدمه.</p>
+        </div>
+        <div class="brand-feature">
+          <span class="brand-feature-icon brand-feature-icon--secure" aria-hidden="true"></span>
+          <h3 class="brand-feature-title">آمن وبسيط</h3>
+          <p class="brand-feature-text">دفع آمن وأسعار واضحة. بدون رسوم مخفية — ما تراه هو ما تدفعه.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -161,10 +159,10 @@
   <!-- Cart Modal -->
   <div id="cart-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title" aria-hidden="true">
     <div class="modal-content cart-modal-content">
-      <button class="modal-close" onclick="closeCart()" aria-label="Close cart">
+      <button class="modal-close" onclick="closeCart()" aria-label="إغلاق السلة">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-      <h2 id="cart-modal-title">Your Cart</h2>
+      <h2 id="cart-modal-title">سلتك</h2>
       
       <div id="cart-items" class="cart-items">
         <!-- Cart items rendered dynamically -->
@@ -172,22 +170,22 @@
       
       <div class="cart-summary">
         <div class="cart-summary-row">
-          <span>Subtotal:</span>
-          <span id="cart-subtotal">0 DZD</span>
+          <span>المجموع الفرعي:</span>
+          <span id="cart-subtotal">0 د.ج</span>
         </div>
         <div class="cart-summary-row cart-total-row">
-          <span>Total:</span>
-          <span id="cart-total">0 DZD</span>
+          <span>الإجمالي:</span>
+          <span id="cart-total">0 د.ج</span>
         </div>
       </div>
       
       <!-- Checkout Form -->
       <form id="checkout-form" class="checkout-form" onsubmit="handleCheckoutSubmit(event)">
-        <h3>Order Information</h3>
+        <h3>معلومات الطلب</h3>
         
         <div class="form-row">
           <div class="form-group">
-            <label for="checkout-firstname">First Name <span class="required">*</span></label>
+            <label for="checkout-firstname">الاسم الأول <span class="required">*</span></label>
             <input 
               type="text" 
               id="checkout-firstname" 
@@ -201,7 +199,7 @@
           </div>
           
           <div class="form-group">
-            <label for="checkout-lastname">Last Name <span class="required">*</span></label>
+            <label for="checkout-lastname">اسم العائلة <span class="required">*</span></label>
             <input 
               type="text" 
               id="checkout-lastname" 
@@ -216,7 +214,7 @@
         </div>
         
         <div class="form-group">
-          <label for="checkout-email">Email <span class="required">*</span></label>
+          <label for="checkout-email">البريد الإلكتروني <span class="required">*</span></label>
           <input 
             type="email" 
             id="checkout-email" 
@@ -230,38 +228,64 @@
           <span class="error-message" id="error-email" role="alert"></span>
         </div>
         
-        <div class="form-group">
-          <label for="checkout-phone">Phone <span class="required">*</span></label>
-          <input 
-            type="tel" 
-            id="checkout-phone" 
-            name="phone" 
-            required 
-            autocomplete="tel"
-            placeholder="+2136XXXXXXXX"
-            aria-required="true"
-            aria-invalid="false"
-          >
+        <div class="form-group form-group--phone">
+          <label for="checkout-phone">الهاتف <span class="required">*</span></label>
+          <div class="phone-row">
+            <select id="checkout-phone-code" name="phoneCode" aria-label="رمز الدولة" title="رمز الدولة">
+              <option value="+213" selected>+213 الجزائر</option>
+              <option value="+212">+212 المغرب</option>
+              <option value="+216">+216 تونس</option>
+              <option value="+33">+33 فرنسا</option>
+              <option value="+31">+31 هولندا</option>
+              <option value="+32">+32 بلجيكا</option>
+              <option value="+41">+41 سويسرا</option>
+              <option value="+44">+44 المملكة المتحدة</option>
+              <option value="+49">+49 ألمانيا</option>
+              <option value="+1">+1 أمريكا/كندا</option>
+              <option value="+20">+20 مصر</option>
+              <option value="+966">+966 السعودية</option>
+              <option value="+971">+971 الإمارات</option>
+              <option value="+965">+965 الكويت</option>
+              <option value="+974">+974 قطر</option>
+              <option value="+973">+973 البحرين</option>
+              <option value="+968">+968 عمان</option>
+              <option value="+962">+962 الأردن</option>
+              <option value="+961">+961 لبنان</option>
+              <option value="+963">+963 سوريا</option>
+              <option value="+964">+964 العراق</option>
+              <option value="+90">+90 تركيا</option>
+            </select>
+            <input 
+              type="tel" 
+              id="checkout-phone" 
+              name="phone" 
+              required 
+              autocomplete="tel-national"
+              placeholder="6XXXXXXXX"
+              aria-required="true"
+              aria-invalid="false"
+            >
+          </div>
           <span class="error-message" id="error-phone" role="alert"></span>
         </div>
         
         <div class="form-group">
-          <label for="checkout-wilaya">Wilaya <span class="required">*</span></label>
+          <label for="checkout-wilaya">الولاية <span class="required">*</span></label>
           <select id="checkout-wilaya" name="wilaya" required aria-required="true" aria-invalid="false">
-            <option value="">Select wilaya</option>
+            <option value="">اختر الولاية</option>
             <!-- Options populated by script.js -->
           </select>
           <span class="error-message" id="error-wilaya" role="alert"></span>
         </div>
         
         <div class="form-group">
-          <label for="checkout-address">Address <span class="required">*</span></label>
+          <label for="checkout-address">العنوان <span class="required">*</span></label>
           <textarea 
             id="checkout-address" 
             name="address" 
             required 
             autocomplete="street-address"
-            placeholder="Street name, building number, city..."
+            placeholder="اسم الشارع، رقم المبنى، المدينة..."
             rows="3"
             aria-required="true"
             aria-invalid="false"
@@ -270,19 +294,19 @@
         </div>
         
         <div class="form-group">
-          <label for="checkout-notes">Notes (Optional)</label>
+          <label for="checkout-notes">ملاحظات (اختياري)</label>
           <textarea 
             id="checkout-notes" 
             name="notes" 
             autocomplete="off"
-            placeholder="Delivery instructions, special requests..."
+            placeholder="تعليمات التوصيل، طلبات خاصة..."
             rows="2"
             aria-invalid="false"
           ></textarea>
         </div>
-        <p class="checkout-trust" aria-hidden="true">Secure checkout · Your data is protected</p>
+        <p class="checkout-trust" aria-hidden="true">دفع آمن · بياناتك محمية</p>
         <button type="submit" class="btn btn-primary btn-large btn-block">
-          Place Order
+          تأكيد الطلب
         </button>
       </form>
     </div>
@@ -296,13 +320,35 @@
   <!-- Footer -->
   <footer class="site-footer">
     <div class="container">
-      <p class="footer-brand" id="footer-store-name">My Store</p>
-      <p class="footer-tagline">Quality clothing, delivered across Algeria.</p>
-      <p class="footer-trust">Secure checkout · Quality guarantee · Nationwide delivery</p>
-      <p class="footer-copy">&copy; <span id="footer-year"></span> <span id="footer-store-name-copy">My Store</span>. All rights reserved.</p>
+      <p class="footer-brand" id="footer-store-name">متجري</p>
+      <p class="footer-tagline">ملابس بجودة عالية، توصيل في كل أنحاء الجزائر.</p>
+      <p class="footer-trust">دفع آمن · ضمان الجودة · توصيل لجميع الولايات</p>
+      <p class="footer-copy">© <span id="footer-year"></span> <span id="footer-store-name-copy">متجري</span>. جميع الحقوق محفوظة.</p>
     </div>
   </footer>
 
   <script src="script.js"></script>
+  <script>
+  // Scroll reveal — design only, no functional impact
+  (function() {
+    const targets = document.querySelectorAll(
+      '.product-card, [class*="product-card"], [class*="feature-card"], [class*="why-card"], .brand-feature, h2, .section-title'
+    );
+    targets.forEach(el => el.classList.add('reveal'));
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    targets.forEach(el => observer.observe(el));
+  })();
+  </script>
 </body>
 </html>
