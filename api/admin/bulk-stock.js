@@ -1,14 +1,14 @@
-import { requireAdmin } from '../_lib/auth.js';
+/**
+ * Admin bulk stock update: accept array of { id, inventory }, update up to 500 products.
+ */
+import { requireAdminAndMethods } from '../_lib/adminGuard.js';
 import { supabaseAdmin } from '../_lib/supabase.js';
 import { catchAsync } from '../_lib/catchAsync.js';
-import { allowMethods } from '../_lib/guard.js';
 import { sendSuccess, sendError } from '../_lib/response.js';
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from '../_lib/constants.js';
 
 async function handler(req, res) {
-  if (!requireAdmin(req, res)) return;
-  if (!allowMethods(req, res, 'POST')) return;
+  if (!requireAdminAndMethods(req, res, 'POST')) return;
 
   const { updates } = req.body || {};
   if (!Array.isArray(updates) || updates.length === 0) return res.status(400).json({ error: 'لا توجد تحديثات' });
@@ -16,7 +16,7 @@ async function handler(req, res) {
 
   const valid = [], errors = [];
   for (const u of updates) {
-    if (!u.id || !UUID.test(u.id)) { errors.push(`معرّف غير صحيح: ${u.id}`); continue; }
+    if (!u.id || !UUID_REGEX.test(u.id)) { errors.push(`معرّف غير صحيح: ${u.id}`); continue; }
     const inv = Number(u.inventory);
     if (isNaN(inv) || inv < 0 || !Number.isInteger(inv)) { errors.push(`مخزون غير صحيح: ${u.id}`); continue; }
     valid.push({ id: u.id, inventory: inv });

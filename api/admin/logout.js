@@ -1,3 +1,6 @@
+/**
+ * Admin logout: POST clears the auth cookie.
+ */
 import { clearAuthCookie } from '../_lib/auth.js';
 import { catchAsync } from '../_lib/catchAsync.js';
 import { allowMethods } from '../_lib/guard.js';

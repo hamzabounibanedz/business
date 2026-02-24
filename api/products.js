@@ -1,3 +1,6 @@
+/**
+ * Public products API: returns active products with storefront shape (name, category.slug, tags for filters).
+ */
 import { supabaseAdmin } from './_lib/supabase.js';
 import { catchAsync } from './_lib/catchAsync.js';
 import { allowMethods } from './_lib/guard.js';

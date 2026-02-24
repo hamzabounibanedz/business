@@ -1,3 +1,6 @@
+/**
+ * Admin login: POST { username, password } → Set-Cookie (JWT). Rate-limited by IP.
+ */
 import bcrypt from 'bcryptjs';
 import { makeAuthCookie } from '../_lib/auth.js';
 import { catchAsync } from '../_lib/catchAsync.js';

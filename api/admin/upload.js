@@ -1,18 +1,22 @@
-import { requireAdmin } from '../_lib/auth.js';
+/**
+ * Admin image upload: multipart form field "image" → Supabase Storage.
+ * Bucket is auto-created if missing. Requires bodyParser: false for formidable.
+ */
+import { requireAdminAndMethods } from '../_lib/adminGuard.js';
 import { supabaseAdmin } from '../_lib/supabase.js';
 import { catchAsync } from '../_lib/catchAsync.js';
-import { allowMethods } from '../_lib/guard.js';
-import { sendSuccess, sendError } from '../_lib/response.js';
+import { sendSuccess } from '../_lib/response.js';
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 
 export const config = { api: { bodyParser: false } };
 
-const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
-const MAX_MB  = 5 * 1024 * 1024;
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+const BUCKET_DEFAULT = 'product-images';
 
-// Verify actual file signature, not just the header claim
+/** Verify file signature matches declared MIME (security). */
 function verifyMagicBytes(buffer, mimetype) {
   const bytes = buffer.slice(0, 12);
   const hex = bytes.toString('hex');
@@ -24,10 +28,12 @@ function verifyMagicBytes(buffer, mimetype) {
 }
 
 async function handler(req, res) {
-  if (!requireAdmin(req, res)) return;
-  if (!allowMethods(req, res, 'POST')) return;
+  if (!requireAdminAndMethods(req, res, 'POST')) return;
 
-  const form = formidable({ maxFileSize: MAX_MB, filter: ({ mimetype }) => ALLOWED.includes(mimetype) });
+  const form = formidable({
+    maxFileSize: MAX_FILE_BYTES,
+    filter: ({ mimetype }) => ALLOWED_MIMES.includes(mimetype),
+  });
   let files;
   try {
     [, files] = await form.parse(req);
@@ -40,7 +46,7 @@ async function handler(req, res) {
   const fileArr = files.image;
   const file = Array.isArray(fileArr) ? fileArr[0] : fileArr;
   if (!file) return res.status(400).json({ error: 'لم يتم اختيار صورة' });
-  if (!ALLOWED.includes(file.mimetype)) return res.status(400).json({ error: 'نوع الملف غير مدعوم (JPEG/PNG/WebP/AVIF)' });
+  if (!ALLOWED_MIMES.includes(file.mimetype)) return res.status(400).json({ error: 'نوع الملف غير مدعوم (JPEG/PNG/WebP/AVIF)' });
 
   const buffer = fs.readFileSync(file.filepath);
   if (!verifyMagicBytes(buffer, file.mimetype)) {
@@ -49,19 +55,17 @@ async function handler(req, res) {
 
   const ext = path.extname(file.originalFilename || '.jpg').toLowerCase() || '.jpg';
   const name = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}${ext}`;
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'product-images';
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET || BUCKET_DEFAULT;
 
-  // Check bucket exists first — gives a clearer error message
   const { data: buckets, error: bucketsErr } = await supabaseAdmin.storage.listBuckets();
   if (bucketsErr) return res.status(500).json({ error: 'خطأ في التحقق من التخزين: ' + bucketsErr.message });
 
   const bucketExists = buckets?.some(b => b.name === bucket);
   if (!bucketExists) {
-    // Auto-create the bucket as public
     const { error: createErr } = await supabaseAdmin.storage.createBucket(bucket, {
       public: true,
-      fileSizeLimit: 5242880, // 5MB
-      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
+      fileSizeLimit: MAX_FILE_BYTES,
+      allowedMimeTypes: ALLOWED_MIMES,
     });
     if (createErr) {
       return res.status(500).json({

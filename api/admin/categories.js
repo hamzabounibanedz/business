@@ -1,13 +1,14 @@
-import { requireAdmin } from '../_lib/auth.js';
+/**
+ * Admin categories API: list (GET) or create (POST).
+ */
+import { requireAdminAndMethods } from '../_lib/adminGuard.js';
 import { supabaseAdmin } from '../_lib/supabase.js';
 import { validateCategory } from '../_lib/validate.js';
 import { catchAsync } from '../_lib/catchAsync.js';
-import { allowMethods } from '../_lib/guard.js';
 import { sendSuccess, sendError } from '../_lib/response.js';
 
 async function handler(req, res) {
-  if (!requireAdmin(req, res)) return;
-  if (!allowMethods(req, res, 'GET', 'POST')) return;
+  if (!requireAdminAndMethods(req, res, 'GET', 'POST')) return;
 
   if (req.method === 'GET') {
     const { data, error } = await supabaseAdmin.from('categories').select('*').order('sort_order');

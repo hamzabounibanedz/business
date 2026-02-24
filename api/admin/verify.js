@@ -1,11 +1,12 @@
-import { requireAdmin } from '../_lib/auth.js';
+/**
+ * Admin auth check: GET returns { authenticated: true } if valid admin cookie.
+ */
+import { requireAdminAndMethods } from '../_lib/adminGuard.js';
 import { catchAsync } from '../_lib/catchAsync.js';
-import { allowMethods } from '../_lib/guard.js';
 import { sendSuccess } from '../_lib/response.js';
 
 async function verifyHandler(req, res) {
-  if (!allowMethods(req, res, 'GET')) return;
-  if (!requireAdmin(req, res)) return;
+  if (!requireAdminAndMethods(req, res, 'GET')) return;
   sendSuccess(res, { authenticated: true });
 }
 

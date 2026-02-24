@@ -1,5 +1,7 @@
-// Proxy for order submission (avoids CORS). Set GOOGLE_WEBHOOK_URL in Vercel.
-
+/**
+ * Order submission proxy: validates payload, forwards to Google Sheets webhook,
+ * returns 200 quickly and runs stock decrement in background. Set GOOGLE_WEBHOOK_URL in Vercel.
+ */
 import { supabaseAdmin } from './_lib/supabase.js';
 import { catchAsync } from './_lib/catchAsync.js';
 import { allowMethods } from './_lib/guard.js';
@@ -30,11 +32,21 @@ async function handler(req, res) {
   }
   const bodyString = JSON.stringify(body);
 
-  const response = await fetch(GOOGLE_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: bodyString,
-  });
+  let response;
+  try {
+    response = await fetch(GOOGLE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: bodyString,
+    });
+  } catch (fetchErr) {
+    console.error('Webhook fetch failed:', fetchErr.message);
+    return res.status(502).json({
+      success: false,
+      error: 'فشل إرسال الطلب. يرجى المحاولة لاحقاً.',
+      detail: fetchErr.code === 'ENOTFOUND' ? 'لا يمكن الاتصال بخادم الطلبات (تحقق من الاتصال أو استخدم النشر المباشر).' : fetchErr.message
+    });
+  }
 
   const text = await response.text();
   let data;
@@ -45,16 +57,13 @@ async function handler(req, res) {
   }
 
   if (response.ok) {
-    try {
-      if (Array.isArray(items) && items.length > 0) {
-        await Promise.allSettled(
-          items.map(item =>
-            supabaseAdmin.rpc('decrement_inventory', { p_id: item.id, qty: item.quantity })
-          )
-        );
-      }
-    } catch (stockErr) {
-      console.error('Stock decrement failed (order still recorded):', stockErr.message);
+    // Return immediately so the client gets a fast response; run stock decrement in background
+    if (Array.isArray(items) && items.length > 0) {
+      Promise.allSettled(
+        items.map(item =>
+          supabaseAdmin.rpc('decrement_inventory', { p_id: item.id, qty: item.quantity })
+        )
+      ).catch(stockErr => console.error('Stock decrement failed (order still recorded):', stockErr.message));
     }
     return res.status(200).json({ success: true });
   }

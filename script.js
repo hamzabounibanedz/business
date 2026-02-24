@@ -35,8 +35,8 @@ const CONFIG = {
   // UTM tracking
   UTM_CAPTURE: true,
   
-  // Retry settings
-  MAX_CLIENT_RETRIES: 3,
+  // Retry settings (0 for order submit to avoid duplicate orders if first attempt succeeded but response was slow)
+  MAX_CLIENT_RETRIES: 0,
   RETRY_BACKOFF_MS: 1000
 };
 
@@ -1321,15 +1321,19 @@ function clearAllFieldErrors() {
   clearFieldError("checkout-address", "error-address");
 }
 
+let checkoutSubmitting = false;
+
 function handleCheckoutSubmit(event) {
   event.preventDefault();
+  if (checkoutSubmitting) return;
   const form = event.target;
   const submitBtn = form.querySelector('button[type="submit"]');
   
   // Clear all previous errors
   clearAllFieldErrors();
   
-  // Disable submit
+  // Prevent double submit
+  checkoutSubmitting = true;
   submitBtn.disabled = true;
   submitBtn.textContent = CONFIG.LOADING_TEXT;
   
@@ -1393,11 +1397,9 @@ function handleCheckoutSubmit(event) {
   }
   
   if (hasErrors) {
-    // Focus first error field
     const firstErrorField = form.querySelector("[aria-invalid='true']");
-    if (firstErrorField) {
-      firstErrorField.focus();
-    }
+    if (firstErrorField) firstErrorField.focus();
+    checkoutSubmitting = false;
     submitBtn.disabled = false;
     submitBtn.textContent = "تأكيد الطلب";
     return;
@@ -1416,11 +1418,9 @@ function handleCheckoutSubmit(event) {
   }
   
   if (hasErrors) {
-    // Focus first error field
     const firstErrorField = form.querySelector("[aria-invalid='true']");
-    if (firstErrorField) {
-      firstErrorField.focus();
-    }
+    if (firstErrorField) firstErrorField.focus();
+    checkoutSubmitting = false;
     submitBtn.disabled = false;
     submitBtn.textContent = "تأكيد الطلب";
     return;
@@ -1441,12 +1441,11 @@ function handleCheckoutSubmit(event) {
       console.error("Order submission error:", error);
       const errorMessage = error.message || CONFIG.ERROR_MESSAGE;
       showNotification(`خطأ: ${errorMessage}. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.`, true);
-      
-      // Log failed order for debugging
       const failedOrders = JSON.parse(localStorage.getItem("store_failed_orders") || "[]");
       console.log("Failed orders in queue:", failedOrders.length);
     })
     .finally(() => {
+      checkoutSubmitting = false;
       submitBtn.disabled = false;
       submitBtn.textContent = "تأكيد الطلب";
     });

@@ -1,3 +1,8 @@
+/**
+ * Request validation for admin API. Returns { valid, data } or { valid: false, error }.
+ * All error messages are in Arabic.
+ */
+
 export function validateProduct(body) {
   const { name_ar, sku, price, inventory } = body;
   if (!name_ar?.trim()) return { valid: false, error: 'اسم المنتج بالعربية مطلوب' };

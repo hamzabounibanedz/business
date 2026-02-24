@@ -1,19 +1,20 @@
-import { requireAdmin } from '../../_lib/auth.js';
+/**
+ * Admin single category: update (PUT) or delete (DELETE) by id.
+ * Delete is blocked if category has products (409).
+ */
+import { requireAdminAndMethods } from '../../_lib/adminGuard.js';
 import { supabaseAdmin } from '../../_lib/supabase.js';
 import { validateCategory } from '../../_lib/validate.js';
 import { catchAsync } from '../../_lib/catchAsync.js';
-import { allowMethods } from '../../_lib/guard.js';
 import { sendSuccess, sendError } from '../../_lib/response.js';
 import { notFound } from '../../_lib/errors.js';
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_REGEX } from '../../_lib/constants.js';
 
 async function handler(req, res) {
-  if (!requireAdmin(req, res)) return;
-  if (!allowMethods(req, res, 'PUT', 'DELETE')) return;
+  if (!requireAdminAndMethods(req, res, 'PUT', 'DELETE')) return;
 
   const { id } = req.query;
-  if (!UUID.test(id)) return res.status(400).json({ error: 'معرّف غير صحيح' });
+  if (!UUID_REGEX.test(id)) return res.status(400).json({ error: 'معرّف غير صحيح' });
 
   if (req.method === 'PUT') {
     const v = validateCategory(req.body);
