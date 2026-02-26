@@ -1401,7 +1401,7 @@ input[type="text"]::placeholder {
 
 .product-image {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--color-bg);
   position: relative;
@@ -1517,8 +1517,7 @@ input[type="text"]::placeholder {
 .product-card p:not(.price) {
   font-size: 0.78rem;
   color: var(--color-ink-muted);
-  line-height: 1.7;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -3335,7 +3334,7 @@ nav {
 
 .product-card--skeleton { pointer-events: none; }
 .product-skeleton-image {
-  aspect-ratio: 3/4;
+  aspect-ratio: 4 / 3;
   background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-border) 50%, var(--color-surface) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
