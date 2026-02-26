@@ -268,6 +268,16 @@ main .container {
   padding-right: 48px;
 }
 
+@media (max-width: 1024px) {
+  body .container,
+  section .container,
+  header .container,
+  .site-footer .container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
 @media (max-width: 768px) {
   body .container,
   section .container,
@@ -292,6 +302,30 @@ main .container {
   }
   .site-footer {
     padding: 48px 0 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  body .container,
+  section .container,
+  header .container,
+  .site-footer .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+  .hero {
+    min-height: 44vh;
+    padding: 36px 0;
+  }
+  .products-section {
+    padding: 48px 0;
+  }
+  .brand-section {
+    padding: 48px 0;
   }
 }
 
@@ -930,7 +964,17 @@ button.primary,
 
 .filters-row .filter-group--search {
   flex: 1 1 200px;
-  min-width: 140px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .filters-row {
+    gap: var(--spacing-sm);
+  }
+  .filters-row .filter-group--search {
+    flex: 1 1 100%;
+  }
 }
 
 .filters-row .filter-group select,
@@ -1344,30 +1388,7 @@ input[type="text"]::placeholder {
   }
 }
 
-@media (min-width: 640px) {
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
-  }
-}
-
-@media (min-width: 900px) {
-  .product-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .product-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (max-width: 380px) {
-  .product-grid {
-    grid-template-columns: 1fr;
-  }
-}
+/* Column counts for .product-grid are defined in D1 section below (single source of truth) */
 
 .product-card,
 [class*="product-card"],
@@ -2791,6 +2812,23 @@ input[type="text"]::placeholder {
 .footer-tagline { margin-bottom: var(--spacing-xs); }
 .footer-trust { margin-bottom: var(--spacing-lg); }
 
+/* Safe area for notched devices (main site) */
+@supports (padding: env(safe-area-inset-top)) {
+  .header .container {
+    padding-left: max(48px, env(safe-area-inset-left));
+    padding-right: max(48px, env(safe-area-inset-right));
+  }
+  @media (max-width: 768px) {
+    .header .container { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); }
+  }
+  @media (max-width: 480px) {
+    .header .container { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  }
+  .site-footer .container {
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+  }
+}
+
 /* Focus states: visible ring for accessibility (keyboard/screen reader) */
 input:focus-visible,
 select:focus-visible,
@@ -3311,13 +3349,6 @@ nav {
   font-family: var(--font-family-base);
 }
 
-.filters-row .filter-group--search {
-  min-width: 280px;
-}
-@media (max-width: 640px) {
-  .filters-row .filter-group--search { min-width: 0; }
-}
-
 @media (max-width: 768px) {
   .category-tab { min-height: 44px; }
   .btn { min-height: 44px; }
@@ -3392,11 +3423,25 @@ nav {
   padding-right: 32px;
   width: 100%;
 }
+@media (max-width: 1024px) {
+  .products-section .container,
+  #products .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
 @media (max-width: 640px) {
   .products-section .container,
   #products .container {
     padding-left: 16px;
     padding-right: 16px;
+  }
+}
+@media (max-width: 380px) {
+  .products-section .container,
+  #products .container {
+    padding-left: 12px;
+    padding-right: 12px;
   }
 }
 .product-grid {
@@ -3523,9 +3568,22 @@ header,
   border-bottom: 1px solid var(--color-border);
   padding: 0 32px;
   height: 64px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+@media (max-width: 640px) {
+  header, .site-header, .header {
+    padding: 0 16px;
+    height: 56px;
+    min-height: 56px;
+  }
+}
+@media (max-width: 380px) {
+  header, .site-header, .header {
+    padding: 0 12px;
+  }
 }
 .logo,
 .site-header .brand,
@@ -3562,6 +3620,15 @@ header,
   position: sticky;
   top: 64px;
   z-index: 90;
+}
+@media (max-width: 640px) {
+  .filters-section,
+  .search-filters-bar,
+  #filters-bar,
+  .filters-container {
+    top: 56px;
+    padding: 16px 0 14px;
+  }
 }
 .search-box input,
 #search-input {

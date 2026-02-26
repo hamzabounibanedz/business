@@ -132,19 +132,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);direction:rtl
 .btn-block{width:100%}
 
 /* ── LAYOUT ── */
-.dashboard{display:flex;min-height:100vh}
-.sidebar{width:240px;min-width:240px;background:var(--sidebar);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 20px rgba(0,0,0,.15)}
-.sidebar-logo{padding:28px 20px 22px;border-bottom:1px solid rgba(255,255,255,.08)}
+.dashboard{display:flex;min-height:100vh;min-height:100dvh}
+.sidebar{width:240px;min-width:240px;background:var(--sidebar);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;flex-shrink:0;box-shadow:2px 0 20px rgba(0,0,0,.15)}
+.sidebar-logo{padding:28px 20px 22px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
 .sidebar-logo-img{display:block;width:auto;max-width:100%;max-height:40px;object-fit:contain;object-position:right center}
-.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;min-height:0}
 .nav-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border:none;background:none;color:rgba(250,250,248,.7);font-family:var(--font);font-size:.875rem;cursor:pointer;text-align:right;width:100%;border-radius:var(--radius-md);transition:background .2s,color .2s;border-right:3px solid transparent;font-weight:500}
 .nav-item:hover{background:rgba(255,255,255,.08);color:var(--white)}
 .nav-item.active{background:rgba(139,111,71,.22);color:var(--white);border-right-color:var(--accent)}
 .nav-item svg{flex-shrink:0;opacity:.8}
 .nav-item.active svg{opacity:1}
-.sidebar-logout{margin:12px;padding:12px 14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(250,250,248,.6);font-family:var(--font);font-size:.8rem;cursor:pointer;transition:all .2s;text-align:center;border-radius:var(--radius-md)}
+.sidebar-logout{margin:12px;padding:12px 14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(250,250,248,.6);font-family:var(--font);font-size:.8rem;cursor:pointer;transition:all .2s;text-align:center;border-radius:var(--radius-md);flex-shrink:0}
 .sidebar-logout:hover{border-color:rgba(220,38,38,.4);color:#fca5a5;background:rgba(220,38,38,.08)}
-.main-area{flex:1;min-width:0;overflow-y:auto;background:var(--bg)}
+.main-area{flex:1;min-width:0;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column}
 
 /* ── VIEWS ── */
 .view{display:none;padding:32px 40px}
@@ -279,17 +279,121 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);direction:rtl
 /* ── EMPTY ── */
 .empty-row td{text-align:center;padding:48px;color:var(--muted);font-size:.9rem}
 
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .sidebar{position:fixed;right:-230px;top:0;bottom:0;z-index:200;transition:right .25s}
-  .sidebar.open{right:0}
-  .main-area{width:100%}
+/* ── SIDEBAR OVERLAY & TOGGLE (mobile/tablet) ── */
+.sidebar-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(24,24,26,.5);
+  backdrop-filter:blur(4px);
+  z-index:199;
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.sidebar-overlay.visible{
+  display:block;
+  opacity:1;
+}
+.main-header{
+  display:none;
+  align-items:center;
+  gap:14px;
+  padding:14px 20px;
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  position:sticky;
+  top:0;
+  z-index:90;
+}
+.sidebar-toggle{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  padding:0;
+  border:1px solid var(--border);
+  background:var(--white);
+  color:var(--ink);
+  border-radius:var(--radius-md);
+  cursor:pointer;
+  transition:background .2s, border-color .2s, color .2s;
+}
+.sidebar-toggle:hover{
+  background:var(--surface);
+  border-color:var(--beige);
+  color:var(--accent);
+}
+.sidebar-toggle:focus-visible{ outline:2px solid var(--accent); outline-offset:2px }
+.main-header-title{font-size:1rem;font-weight:600;color:var(--ink)}
+
+/* ── RESPONSIVE — harmonic breakpoints ── */
+@media(max-width:1024px){
+  .sidebar{
+    position:fixed;
+    right:-260px;
+    top:0;
+    bottom:0;
+    width:260px;
+    min-width:260px;
+    max-width:85vw;
+    height:100vh;
+    height:100dvh;
+    z-index:200;
+    transition:right .3s cubic-bezier(0.4,0,0.2,1), box-shadow .3s ease;
+    box-shadow:none;
+  }
+  .sidebar.open{
+    right:0;
+    box-shadow:-8px 0 32px rgba(0,0,0,.25);
+  }
+  .main-area{width:100%;min-width:0}
+  .main-header{display:flex}
+  .view{padding:24px 20px}
+  .view-header{flex-direction:column;align-items:flex-start;gap:12px}
+  .view-header-right{width:100%}
+  .view-header-right .search-inp,.view-header-right .filter-sel{flex:1;min-width:0}
   .form-grid{grid-template-columns:1fr}
-  .cat-layout{grid-template-columns:1fr}
+  .cat-layout{grid-template-columns:1fr;gap:20px}
+  .stats-row{gap:12px}
+  .stat-card{min-width:calc(50% - 6px);flex:1 1 calc(50% - 6px)}
+}
+
+@media(max-width:900px){
   .view{padding:20px 16px}
-  .view-header{flex-direction:column;align-items:flex-start}
   .stats-row{gap:10px}
   .stat-card{min-width:calc(50% - 5px)}
+}
+
+@media(max-width:640px){
+  .sidebar{width:280px;min-width:280px;right:-280px}
+  .sidebar.open{right:0}
+  .main-header{padding:12px 16px}
+  .view{padding:16px 12px}
+  .view-header h2{font-size:1.25rem}
+  .view-header-right{flex-direction:column}
+  .view-header-right .search-inp,.view-header-right .filter-sel{width:100%}
+  .stats-row{flex-direction:column;gap:8px}
+  .stat-card{min-width:100%}
+  .table-wrapper{margin:0 -12px;border-radius:0;border-left:none;border-right:none}
+  .data-table th,.data-table td{padding:10px 12px;font-size:.8125rem}
+  .action-row{flex-direction:column}
+  .form-footer{flex-direction:column;align-items:stretch}
+  .confirm-overlay{padding:16px}
+  .login-card{padding:32px 24px 28px}
+}
+
+@media(max-width:380px){
+  .sidebar{max-width:100vw;width:100%;right:-100%}
+  .view{padding:12px 10px}
+  .data-table th,.data-table td{padding:8px 10px;font-size:.75rem}
+}
+
+/* Safe area for notched devices */
+@supports(padding: env(safe-area-inset-top)){
+  .sidebar{padding-right:env(safe-area-inset-right);padding-left:0}
+  .main-header{padding-left:max(14px, env(safe-area-inset-left));padding-right:max(20px, env(safe-area-inset-right))}
 }
 
 /* B1.1 — Stats cards with trend */
@@ -361,7 +465,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);direction:rtl
 <!-- ══ DASHBOARD ══ -->
 <div id="dashboard" class="dashboard" style="display:none">
 
-  <aside class="sidebar">
+  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <aside class="sidebar" id="sidebar" aria-label="القائمة الجانبية">
     <div class="sidebar-logo">
       <img src="/logo.webp" alt="متجري" class="sidebar-logo-img">
     </div>
@@ -387,6 +493,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--ink);direction:rtl
   </aside>
 
   <main class="main-area">
+    <header class="main-header">
+      <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="فتح القائمة" aria-expanded="false" aria-controls="sidebar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
+      <span class="main-header-title" id="main-header-title">المنتجات</span>
+    </header>
 
     <!-- VIEW: PRODUCTS LIST -->
     <section id="view-products" class="view active-view">
@@ -745,12 +857,46 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 // ══════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const mainHeaderTitle = document.getElementById('main-header-title');
+const viewTitles = { products: 'المنتجات', 'add-product': 'إضافة منتج', 'bulk-stock': 'تحديث المخزون', categories: 'التصنيفات' };
+
+function openSidebar() {
+  if (!sidebar || !sidebarOverlay) return;
+  sidebar.classList.add('open');
+  sidebarOverlay.classList.add('visible');
+  sidebarOverlay.setAttribute('aria-hidden', 'false');
+  if (sidebarToggle) { sidebarToggle.setAttribute('aria-expanded', 'true'); sidebarToggle.setAttribute('aria-label', 'إغلاق القائمة'); }
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  if (!sidebar || !sidebarOverlay) return;
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('visible');
+  sidebarOverlay.setAttribute('aria-hidden', 'true');
+  if (sidebarToggle) { sidebarToggle.setAttribute('aria-expanded', 'false'); sidebarToggle.setAttribute('aria-label', 'فتح القائمة'); }
+  document.body.style.overflow = '';
+}
+function toggleSidebar() {
+  if (sidebar && sidebar.classList.contains('open')) closeSidebar();
+  else openSidebar();
+}
+if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) closeSidebar();
+});
+
 function switchView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`[data-view="${name}"]`);
   if (btn) btn.classList.add('active');
   document.getElementById(`view-${name}`)?.classList.add('active-view');
+  if (mainHeaderTitle && viewTitles[name]) mainHeaderTitle.textContent = viewTitles[name];
+  closeSidebar();
   if (name === 'products') { renderProductsTable(); renderStats(); }
   if (name === 'bulk-stock') renderBulkTable();
   if (name === 'categories') renderCatTable();
