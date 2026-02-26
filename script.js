@@ -1608,7 +1608,7 @@ function updateAppliedFilters() {
     chip.textContent = "بحث: \u201C" + state.search + "\u201D ";
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.innerHTML = "&times;";
+    btn.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg>";
     btn.setAttribute("aria-label", "إزالة فلتر البحث");
     btn.addEventListener("click", function() {
       const input = document.getElementById("search-input");
@@ -1623,7 +1623,7 @@ function updateAppliedFilters() {
     chip.textContent = "التصنيف: " + state.tag + " ";
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.innerHTML = "&times;";
+    btn.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg>";
     btn.setAttribute("aria-label", "إزالة فلتر التصنيف");
     btn.addEventListener("click", function() {
       const sel = document.getElementById("filter-tag");
@@ -1638,7 +1638,7 @@ function updateAppliedFilters() {
     chip.textContent = "المقاس: " + state.size + " ";
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.innerHTML = "&times;";
+    btn.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg>";
     btn.setAttribute("aria-label", "إزالة فلتر المقاس");
     btn.addEventListener("click", function() {
       const sel = document.getElementById("filter-size");
@@ -1656,7 +1656,7 @@ function updateAppliedFilters() {
     chip.textContent = "السعر: " + label + " ";
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.innerHTML = "&times;";
+    btn.innerHTML = "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg>";
     btn.setAttribute("aria-label", "إزالة فلتر السعر");
     btn.addEventListener("click", function() {
       const min = document.getElementById("filter-price-min");
@@ -1744,7 +1744,10 @@ async function init() {
   const storeNameEl = document.getElementById("store-name");
   const footerBrandEl = document.getElementById("footer-store-name");
   const footerCopyName = document.getElementById("footer-store-name-copy");
-  if (storeNameEl) storeNameEl.textContent = CONFIG.STORE_NAME;
+  if (storeNameEl) {
+    if (storeNameEl.tagName === 'IMG') storeNameEl.alt = CONFIG.STORE_NAME;
+    else storeNameEl.textContent = CONFIG.STORE_NAME;
+  }
   if (footerBrandEl) footerBrandEl.textContent = CONFIG.STORE_NAME;
   if (footerCopyName) footerCopyName.textContent = CONFIG.STORE_NAME;
   const yearSpan = document.getElementById("footer-year");
